@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+import { RutinaBuilderModule } from '../rutinas/rutina-builder.module';
 import { ProfesorRoutingModule } from './profesor-routing.module';
 import { SharedModule } from '../../shared/shared.module';
 
@@ -13,12 +14,9 @@ import { ReportarComponent } from './pages/reportar/reportar.component';
 import { PerfilProfesorComponent } from './pages/perfil-profesor/perfil-profesor.component';
 import { SolicitudesRutinaComponent } from './pages/solicitudes-rutina/solicitudes-rutina.component';
 import { RutinasListaComponent } from './pages/rutinas-lista/rutinas-lista.component';
-import { RutinaBuilderComponent } from './pages/rutina-builder/rutina-builder.component';
 import { MisHorariosComponent } from './pages/mis-horarios/mis-horarios.component';
 
 import { AlumnoCardComponent } from './components/alumno-card/alumno-card.component';
-import { MaquinaPickerComponent } from './components/maquina-picker/maquina-picker.component';
-import { EjercicioBuilderCardComponent } from './components/ejercicio-builder-card/ejercicio-builder-card.component';
 import { RutinaCardProfesorComponent } from './components/rutina-card-profesor/rutina-card-profesor.component';
 import { TabPerfilComponent } from './components/detalle-alumno-tabs/tab-perfil/tab-perfil.component';
 import { TabRutinasComponent } from './components/detalle-alumno-tabs/tab-rutinas/tab-rutinas.component';
@@ -35,11 +33,8 @@ import { TabSolicitudesComponent } from './components/detalle-alumno-tabs/tab-so
     PerfilProfesorComponent,
     SolicitudesRutinaComponent,
     RutinasListaComponent,
-    RutinaBuilderComponent,
     MisHorariosComponent,
     AlumnoCardComponent,
-    MaquinaPickerComponent,
-    EjercicioBuilderCardComponent,
     RutinaCardProfesorComponent,
     TabPerfilComponent,
     TabRutinasComponent,
@@ -52,6 +47,7 @@ import { TabSolicitudesComponent } from './components/detalle-alumno-tabs/tab-so
     ReactiveFormsModule,
     SharedModule,
     ProfesorRoutingModule,
+    RutinaBuilderModule,
   ],
 })
 export class ProfesorModule {}

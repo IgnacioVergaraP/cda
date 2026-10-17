@@ -250,3 +250,11 @@
   font-weight: $fw-semibold;
   color: $color-text;
 }
+
+.ebc__peso {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: $space-2;
+}
+
+.ebc__peso-unidad { cursor: pointer; }

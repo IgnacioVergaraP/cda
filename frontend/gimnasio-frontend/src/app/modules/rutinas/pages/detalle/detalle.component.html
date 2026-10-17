@@ -17,6 +17,8 @@
 
   <app-ui-page-header [title]="rutina.titulo"></app-ui-page-header>
 
+  <p *ngIf="rutina.creada_por_alumno">Rutina creada por ti</p>
+
   <div class="rutina-detalle__tags">
     <app-ui-badge
       *ngFor="let g of rutina.grupos_musculares"

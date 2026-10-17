@@ -1,3 +1,4 @@
+import { interpretarPeso, UnidadPeso } from '../../../shared/utils/peso';
 import { Ejercicio } from '../../rutinas/models/rutina.model';
 
 /** Ejercicio en el builder: puede ser nuevo o existente. */
@@ -7,6 +8,9 @@ export interface EjercicioBuilder {
   series: number;
   repeticiones: string;
   peso_sugerido: string;
+  peso_unidad: UnidadPeso;
+  peso_valor: number | null;
+  peso_otro: string;
   maquina_id: string | null;
   maquina_nombre?: string | null;
   nombre?: string | null;
@@ -68,10 +72,19 @@ export function ejercicioExistenteABuilder(e: Ejercicio): EjercicioBuilder {
     series: e.series,
     repeticiones: e.repeticiones,
     peso_sugerido: e.peso_sugerido ?? '',
+    peso_unidad: interpretarPeso(e.peso_sugerido).unidad,
+    peso_valor: interpretarPeso(e.peso_sugerido).valor,
+    peso_otro: interpretarPeso(e.peso_sugerido).texto,
     maquina_id: e.maquina_id ?? null,
     maquina_nombre: e.maquina?.nombre ?? null,
     nombre: e.nombre ?? null,
     descripcion: e.descripcion ?? null,
     minimizado: false,
   };
+}
+
+export function pesoBuilderValido(e: EjercicioBuilder): boolean {
+  if (e.peso_unidad === 'otro') return !!e.peso_otro.trim() && e.peso_otro.trim().length <= 40;
+  return e.peso_valor !== null && Number.isFinite(e.peso_valor) && e.peso_valor > 0
+    && `${e.peso_valor} ${e.peso_unidad}`.length <= 40;
 }

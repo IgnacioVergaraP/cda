@@ -1,3 +1,4 @@
+import { pesoEnKg } from '../../../../shared/utils/peso';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
@@ -225,12 +226,7 @@ export class PrincipalComponent implements OnInit {
   }
 
   private parsePeso(s: string): number | null {
-    try {
-      const n = parseFloat(s.toLowerCase().replace('kg', '').trim());
-      return Number.isNaN(n) ? null : n;
-    } catch {
-      return null;
-    }
+    return pesoEnKg(s);
   }
 
   private parseReps(s: string): number | null {

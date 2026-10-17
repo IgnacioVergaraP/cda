@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
+import { RutinasService } from '../../../rutinas/services/rutinas.service';
 import { ProfesorService } from '../../services/profesor.service';
 import {
   CrearRutinaPayload,
@@ -9,6 +10,7 @@ import {
   EjercicioBuilder,
   ejercicioExistenteABuilder,
   generarUid,
+  pesoBuilderValido,
 } from '../../models/rutina-builder.model';
 import { Rutina } from '../../../rutinas/models/rutina.model';
 import { AlumnoListItem } from '../../models/alumno.model';
@@ -23,6 +25,7 @@ type Modo = 'nueva' | 'editar' | 'duplicar';
 })
 export class RutinaBuilderComponent implements OnInit {
 
+  esAlumno = false;
   modo: Modo = 'nueva';
   rutinaId: string | null = null;
 
@@ -45,9 +48,16 @@ export class RutinaBuilderComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private profesorService: ProfesorService,
+    private rutinasService: RutinasService,
   ) {}
 
   ngOnInit(): void {
+    this.esAlumno = this.route.snapshot.data['esAlumno'] === true;
+    if (this.esAlumno) {
+      this.agregarEjercicioVacio();
+      return;
+    }
+
     const url = this.router.url;
     const id = this.route.snapshot.paramMap.get('id');
 
@@ -88,13 +98,13 @@ export class RutinaBuilderComponent implements OnInit {
 
   get puedeGuardar(): boolean {
     if (this.guardando) return false;
-    if (!this.titulo.trim()) return false;
-    if (this.modo !== 'editar' && !this.alumnoId) return false;
-    if (this.ejercicios.length === 0) return false;
+    if (this.titulo.trim().length < 3 || this.titulo.trim().length > 80) return false;
+    if (!this.esAlumno && this.modo !== 'editar' && !this.alumnoId) return false;
+    if (this.ejercicios.length === 0 || this.ejercicios.length > 30) return false;
 
     for (const e of this.ejercicios) {
       if (!e.repeticiones.trim()) return false;
-      if (!e.peso_sugerido.trim()) return false;
+      if (!pesoBuilderValido(e)) return false;
       if (e.tipo === 'maquina' && !e.maquina_id) return false;
       if (e.tipo === 'libre' && !e.nombre?.trim()) return false;
     }
@@ -129,6 +139,9 @@ export class RutinaBuilderComponent implements OnInit {
         series: 3,
         repeticiones: '10',
         peso_sugerido: '',
+        peso_unidad: 'kg',
+        peso_valor: null,
+        peso_otro: '',
         maquina_id: null,
         maquina_nombre: null,
         minimizado: false,
@@ -190,6 +203,21 @@ export class RutinaBuilderComponent implements OnInit {
       descripcion: e.tipo === 'libre' ? e.descripcion?.trim() || null : null,
     }));
 
+    if (this.esAlumno) {
+      this.rutinasService.crear({
+        titulo: this.titulo.trim(),
+        grupos_musculares: this.gruposSeleccionados,
+        ejercicios: ejerciciosPayload,
+      }).pipe(finalize(() => (this.guardando = false)))
+        .subscribe({
+          next: (rutina) => this.router.navigate(['/rutinas', rutina.id]),
+          error: (err: any) => {
+            this.errorGuardar = err?.error?.error?.message ?? 'No se pudo crear la rutina.';
+          },
+        });
+      return;
+    }
+
     if (this.modo === 'editar' && this.rutinaId) {
       const payload: EditarRutinaPayload = {
         titulo: this.titulo.trim(),
@@ -230,7 +258,7 @@ export class RutinaBuilderComponent implements OnInit {
   }
 
   volver(): void {
-    this.router.navigate(['/profesor/rutinas']);
+    this.router.navigate([this.esAlumno ? '/rutinas' : '/profesor/rutinas']);
   }
 
   cancelar(): void {

@@ -1,8 +1,9 @@
 from flask import Blueprint, g, request
 
-from app.utils.responses import ok
-from app.utils.security.decorators import requiere_auth
+from app.utils.responses import ok, created
+from app.utils.security.decorators import requiere_auth, requiere_rol
 from app.blueprints.rutinas import services
+from app.blueprints.profesor.schemas import validar_editar_rutina_payload
 
 bp = Blueprint("rutinas", __name__)
 
@@ -22,3 +23,10 @@ def detalle(rutina_id: str):
         g.usuario_actual.id,
         g.usuario_actual.gimnasio_id,
     ))
+
+
+@bp.post("")
+@requiere_rol("alumno")
+def crear():
+    payload = validar_editar_rutina_payload(request.get_json(silent=True))
+    return created(services.crear_rutina(g.usuario_actual, payload))

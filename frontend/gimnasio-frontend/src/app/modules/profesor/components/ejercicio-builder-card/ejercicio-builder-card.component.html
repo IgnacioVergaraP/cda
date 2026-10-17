@@ -149,18 +149,44 @@
       <label class="ebc__label" [for]="'ebc-peso-' + indice">
         Peso sugerido <span class="ebc__label-obligatorio">(obligatorio)</span>
       </label>
-      <input
-        [id]="'ebc-peso-' + indice"
-        type="text"
-        class="ebc__input"
-        [class.ebc__input--error]="!ejercicio.peso_sugerido.trim()"
-        [value]="ejercicio.peso_sugerido"
-        (input)="onPesoChange($any($event.target).value)"
-        placeholder='Ej: "40 kg", "corporal", "Banda media"' />
-      <span
-        *ngIf="!ejercicio.peso_sugerido.trim()"
-        class="ebc__input-error">
-        El peso es obligatorio
+      <div class="ebc__peso">
+        <select
+          [id]="'ebc-unidad-' + indice"
+          class="ebc__input ebc__peso-unidad"
+          [attr.aria-label]="'Unidad de peso del ejercicio ' + indice"
+          [ngModel]="ejercicio.peso_unidad"
+          (ngModelChange)="onUnidadPesoChange($event)">
+          <option value="kg">kg</option>
+          <option value="lb">lb</option>
+          <option value="otro">Otro</option>
+        </select>
+        <input
+          *ngIf="ejercicio.peso_unidad !== 'otro'"
+          [id]="'ebc-peso-' + indice"
+          type="number"
+          inputmode="decimal"
+          min="0.01"
+          step="any"
+          class="ebc__input"
+          [class.ebc__input--error]="!pesoValido"
+          [attr.aria-invalid]="!pesoValido"
+          [ngModel]="ejercicio.peso_valor"
+          (ngModelChange)="onPesoValorChange($event)"
+          placeholder="Ej: 40" />
+        <input
+          *ngIf="ejercicio.peso_unidad === 'otro'"
+          [id]="'ebc-peso-' + indice"
+          type="text"
+          maxlength="40"
+          class="ebc__input"
+          [class.ebc__input--error]="!pesoValido"
+          [attr.aria-invalid]="!pesoValido"
+          [ngModel]="ejercicio.peso_otro"
+          (ngModelChange)="onPesoOtroChange($event)"
+          placeholder="Ej: Peso corporal, banda media" />
+      </div>
+      <span *ngIf="!pesoValido" class="ebc__input-error">
+        {{ ejercicio.peso_unidad === 'otro' ? 'Describe el peso o la resistencia (máximo 40 caracteres)' : 'Ingresa un peso mayor que cero' }}
       </span>
     </div>
 

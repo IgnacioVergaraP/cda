@@ -1,3 +1,4 @@
+import { pesoEnKg } from '../../../../shared/utils/peso';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
@@ -25,6 +26,7 @@ export class RegistrarComponent implements OnInit {
   rutaRetorno = '/progreso';
   seriesObjetivo: number | null = null;
 
+  pesoSugerido = '';
   peso = 40;
   repeticiones = 10;
 
@@ -82,7 +84,10 @@ export class RegistrarComponent implements OnInit {
       if (!Number.isNaN(n) && n > 0) this.seriesObjetivo = n;
     }
 
-    if (pesoInicial) this.peso = this.parsePeso(pesoInicial) ?? this.peso;
+    if (pesoInicial) {
+      this.pesoSugerido = pesoInicial;
+      this.peso = this.parsePeso(pesoInicial) ?? 0;
+    }
     if (repsInicial) this.repeticiones = this.parseReps(repsInicial) ?? this.repeticiones;
   }
 
@@ -209,12 +214,7 @@ export class RegistrarComponent implements OnInit {
   }
 
   private parsePeso(s: string): number | null {
-    try {
-      const n = parseFloat(s.toLowerCase().replace('kg', '').trim());
-      return Number.isNaN(n) ? null : n;
-    } catch {
-      return null;
-    }
+    return pesoEnKg(s);
   }
 
   private parseReps(s: string): number | null {

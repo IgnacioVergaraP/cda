@@ -13,7 +13,7 @@ from app.extensions import get_supabase
 
 _COLS_RUTINA = (
     "id,alumno_id,titulo,grupos_musculares,profesor_id,profesor_nombre,"
-    "activa,fecha_creacion,fecha_modificacion,gimnasio_id"
+    "activa,fecha_creacion,fecha_modificacion,gimnasio_id,creada_por_alumno"
 )
 _COLS_EJERCICIO = (
     "id,rutina_id,posicion,tipo,maquina_id,nombre_libre,descripcion_libre,"
@@ -48,6 +48,7 @@ def _row_a_rutina(row: dict, ejercicios: List[Ejercicio]) -> Rutina:
         profesor_id=row.get("profesor_id"),
         profesor_nombre=row.get("profesor_nombre"),
         activa=row.get("activa", True),
+        creada_por_alumno=row.get("creada_por_alumno", False),
         ejercicios=ejercicios,
         fecha_creacion=fecha_cre.isoformat() if hasattr(fecha_cre, "isoformat") else (fecha_cre or ""),
         fecha_modificacion=fecha_mod.isoformat() if hasattr(fecha_mod, "isoformat") else fecha_mod,
@@ -113,6 +114,7 @@ class SupabaseRutinasRepository(RutinasRepository):
             self._sb.table("rutinas")
             .select(_COLS_RUTINA)
             .eq("profesor_id", profesor_id)
+            .eq("creada_por_alumno", False)
             .order("fecha_creacion", desc=True)
         )
         if not incluir_inactivas:
@@ -155,6 +157,7 @@ class SupabaseRutinasRepository(RutinasRepository):
             "profesor_id": rutina.profesor_id,
             "profesor_nombre": rutina.profesor_nombre,
             "activa": rutina.activa,
+            "creada_por_alumno": rutina.creada_por_alumno,
             "gimnasio_id": rutina.gimnasio_id,
         }
         resp = self._sb.table("rutinas").insert(rutina_row).execute()

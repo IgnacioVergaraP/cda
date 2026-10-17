@@ -60,7 +60,7 @@ class MockAuth:
         mock_mantenimientos = MockMantenimientosRepository()
 
         # Decoradores
-        self._monkeypatch.setattr(decorators, "_repo", mock_usuarios)
+        self._monkeypatch.setattr(decorators, "_get_repo", lambda: mock_usuarios)
 
         # Imports de todos los services
         from app.blueprints.usuario import services as usuario_services

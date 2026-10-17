@@ -17,11 +17,11 @@
 
   <app-ui-page-header
     [title]="tituloPagina"
-    [subtitle]="modo === 'editar' ? 'Modificá los datos de la rutina' : 'Armá la rutina para el alumno'">
+    [subtitle]="esAlumno ? 'Crea tu propia rutina de entrenamiento' : (modo === 'editar' ? 'Modificá los datos de la rutina' : 'Armá la rutina para el alumno')">
   </app-ui-page-header>
 
   <!-- Selector de alumno -->
-  <div *ngIf="modo === 'nueva'" class="rb__field">
+  <div *ngIf="!esAlumno && modo === 'nueva'" class="rb__field">
     <label class="rb__label" for="rb-alumno">Alumno destinatario</label>
 
     <div *ngIf="cargandoAlumnos" class="rb__loading-inline">
@@ -91,6 +91,7 @@
     <button
       type="button"
       class="rb__agregar"
+      [disabled]="ejercicios.length >= 30"
       (click)="agregarEjercicioVacio()">
       <i class="bi bi-plus-lg" aria-hidden="true"></i>
       Agregar ejercicio

@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { EjercicioBuilder } from '../../models/rutina-builder.model';
+import { UnidadPeso } from '../../../../shared/utils/peso';
+import { EjercicioBuilder, pesoBuilderValido } from '../../models/rutina-builder.model';
 import { Maquina } from '../../../maquinas/models/maquina.model';
 
 @Component({
@@ -85,8 +86,27 @@ export class EjercicioBuilderCardComponent {
     this.cambio.emit({ ...this.ejercicio, repeticiones: v });
   }
 
-  onPesoChange(v: string): void {
-    this.cambio.emit({ ...this.ejercicio, peso_sugerido: v });
+  get pesoValido(): boolean {
+    return pesoBuilderValido(this.ejercicio);
+  }
+
+  onUnidadPesoChange(unidad: UnidadPeso): void {
+    this.emitirPeso({ ...this.ejercicio, peso_unidad: unidad });
+  }
+
+  onPesoValorChange(valor: number | null): void {
+    this.emitirPeso({ ...this.ejercicio, peso_valor: valor });
+  }
+
+  onPesoOtroChange(texto: string): void {
+    this.emitirPeso({ ...this.ejercicio, peso_otro: texto });
+  }
+
+  private emitirPeso(ejercicio: EjercicioBuilder): void {
+    ejercicio.peso_sugerido = ejercicio.peso_unidad === 'otro'
+      ? ejercicio.peso_otro.trim()
+      : (ejercicio.peso_valor === null ? '' : `${ejercicio.peso_valor} ${ejercicio.peso_unidad}`);
+    this.cambio.emit(ejercicio);
   }
 
   onEliminar(): void { this.eliminar.emit(); }

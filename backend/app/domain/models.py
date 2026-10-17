@@ -138,6 +138,7 @@ class Rutina:
     ejercicios: List[Ejercicio] = field(default_factory=list)
     fecha_creacion: str = ""
     fecha_modificacion: Optional[str] = None
+    creada_por_alumno: bool = False
 
     def to_dict(self) -> dict:
         return {
@@ -148,6 +149,7 @@ class Rutina:
             "gimnasio_id": self.gimnasio_id,
             "profesor_id": self.profesor_id,
             "profesor_nombre": self.profesor_nombre,
+            "creada_por_alumno": self.creada_por_alumno,
             "activa": self.activa,
             "fecha_creacion": self.fecha_creacion,
             "fecha_modificacion": self.fecha_modificacion,

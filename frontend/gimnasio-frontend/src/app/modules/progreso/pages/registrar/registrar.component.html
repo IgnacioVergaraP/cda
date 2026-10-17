@@ -17,6 +17,8 @@
 
 <div class="registrar__body">
 
+  <p *ngIf="pesoSugerido">Peso sugerido: {{ pesoSugerido }}</p>
+
   <section class="registrar__steppers">
     <app-stepper
       label="Peso"

@@ -5,6 +5,39 @@
   flex-direction: column;
   gap: $space-3;
   padding-top: $space-2;
+  padding-bottom: 72px;
+}
+
+.rutinas-lista__fab {
+  position: fixed;
+  right: max(#{$space-4}, #{$safe-area-right});
+  bottom: calc(#{$bottom-nav-height} + #{$safe-area-bottom} + #{$space-4});
+  z-index: $z-bottom-nav + 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: $color-primary;
+  color: $color-text-inverse;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(var(--brand-rgb), 0.28);
+  transition: background 150ms ease, transform 100ms ease;
+
+  @include hover { background: $color-primary-hover; }
+  &:active { transform: scale(0.96); }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 3px;
+  }
+
+  i { font-size: 24px; line-height: 1; }
+
+  @include lg-up {
+    right: calc(50% - #{$content-max-width} / 2 + #{$space-4});
+  }
 }
 
 .rutinas-lista__loading {

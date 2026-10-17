@@ -21,6 +21,8 @@
       </app-ui-badge>
     </div>
 
+    <p *ngIf="rutina.creada_por_alumno" class="rutina-card__meta">Creada por ti</p>
+
     <p class="rutina-card__meta">
       {{ cantidadEjercicios }} ejercicio{{ cantidadEjercicios === 1 ? '' : 's' }}
     </p>

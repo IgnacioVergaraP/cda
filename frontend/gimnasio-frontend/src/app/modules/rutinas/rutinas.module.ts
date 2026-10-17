@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+import { RutinaBuilderModule } from './rutina-builder.module';
 import { RutinasRoutingModule } from './rutinas-routing.module';
 import { SharedModule } from '../../shared/shared.module';
 
@@ -25,6 +26,7 @@ import { SolicitudRutinaAlumnoComponent } from './components/solicitud-rutina-al
     ReactiveFormsModule,
     SharedModule,
     RutinasRoutingModule,
+    RutinaBuilderModule,
   ],
 })
 export class RutinasModule {}

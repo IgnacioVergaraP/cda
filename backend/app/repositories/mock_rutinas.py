@@ -148,7 +148,7 @@ class MockRutinasRepository(RutinasRepository):
     def listar_por_profesor(self, profesor_id: str, incluir_inactivas: bool = False) -> List[Rutina]:
         result = []
         for r in self._rutinas:
-            if r.profesor_id != profesor_id:
+            if r.profesor_id != profesor_id or r.creada_por_alumno:
                 continue
             if not incluir_inactivas and not r.activa:
                 continue

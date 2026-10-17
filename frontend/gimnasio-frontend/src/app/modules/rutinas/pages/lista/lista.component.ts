@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
 
+import { AuthService } from '../../../auth/services/auth.service';
 import { Rutina } from '../../models/rutina.model';
 import { RutinasService } from '../../services/rutinas.service';
 import { SolicitudesRutinaService } from '../../services/solicitudes-rutina.service';
@@ -51,6 +52,7 @@ export class ListaComponent implements OnInit {
   readonly gruposDisponibles = GRUPOS_MUSCULARES;
 
   constructor(
+    public auth: AuthService,
     private rutinasService: RutinasService,
     private solicitudesService: SolicitudesRutinaService,
     private fb: FormBuilder,

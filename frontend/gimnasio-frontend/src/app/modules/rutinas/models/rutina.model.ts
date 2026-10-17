@@ -28,6 +28,7 @@ export interface Rutina {
   titulo: string;
   grupos_musculares: string[];
   alumno_id: string;
+  creada_por_alumno: boolean;
   profesor_id: string | null;
   profesor_nombre: string | null;
   activa: boolean;

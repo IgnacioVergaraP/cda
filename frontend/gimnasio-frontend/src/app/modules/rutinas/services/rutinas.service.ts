@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
+import { EditarRutinaPayload } from '../../profesor/models/rutina-builder.model';
 import { Rutina } from '../models/rutina.model';
 
 interface ApiResponse<T> {
@@ -23,6 +24,11 @@ export class RutinasService {
     const q = incluirInactivas ? '?incluir_inactivas=true' : '';
     return this.http
       .get<ApiResponse<Rutina[]>>(`${this.baseUrl}${q}`)
+      .pipe(map(res => res.data));
+  }
+
+  crear(payload: EditarRutinaPayload): Observable<Rutina> {
+    return this.http.post<ApiResponse<Rutina>>(this.baseUrl, payload)
       .pipe(map(res => res.data));
   }
 

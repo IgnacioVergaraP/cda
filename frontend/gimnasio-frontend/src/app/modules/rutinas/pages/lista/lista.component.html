@@ -1,6 +1,6 @@
 <app-ui-page-header
   title="Mis rutinas"
-  subtitle="Entrenamientos asignados">
+  subtitle="Tus entrenamientos asignados y personales">
 </app-ui-page-header>
 
 <app-solicitud-rutina-alumno
@@ -49,8 +49,8 @@
 <app-ui-empty-state
   *ngIf="!cargando && !errorMensaje && rutinas.length === 0"
   icon="bi-clipboard-x"
-  title="Sin rutinas asignadas"
-  message="Todavía no tienes rutinas. Puedes pedirle una a un profesor.">
+  title="Sin rutinas"
+  message="Todavía no tienes rutinas. Puedes crear la tuya o pedirle una a un profesor.">
 </app-ui-empty-state>
 
 <div *ngIf="!cargando && !errorMensaje && rutinas.length > 0" class="rutinas-lista">
@@ -59,6 +59,15 @@
     [rutina]="r">
   </app-rutina-card>
 </div>
+
+<a
+  *ngIf="auth.tieneRol('alumno')"
+  class="rutinas-lista__fab"
+  routerLink="/rutinas/nueva"
+  aria-label="Crear mi rutina"
+  title="Crear mi rutina">
+  <i class="bi bi-plus-lg" aria-hidden="true"></i>
+</a>
 
 <!-- Sheet de solicitud de rutina -->
 <app-ui-sheet
