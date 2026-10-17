@@ -1,0 +1,41 @@
+<app-ui-page-header [title]="gestion ? 'Gestionar ejercicios' : 'Ejercicios'" subtitle="Descubre ejercicios y dónde realizarlos en tu gimnasio"></app-ui-page-header>
+<div *ngIf="gestion" class="catalogo__acciones catalogo__acciones--fila">
+  <app-ui-button variant="secondary" [block]="true" routerLink="/admin/catalogo/recursos">Recursos</app-ui-button>
+  <app-ui-button variant="primary" [block]="true" routerLink="/admin/catalogo/nuevo">Nuevo ejercicio</app-ui-button>
+</div>
+<div class="catalogo__categorias" role="group" aria-label="Categoría de ejercicio">
+  <button type="button" class="catalogo__chip" [class.catalogo__chip--activo]="!categoria" [attr.aria-pressed]="!categoria" (click)="setCategoria('')">Todos</button>
+  <button *ngFor="let c of categorias" type="button" class="catalogo__chip" [class.catalogo__chip--activo]="categoria === c.value" [attr.aria-pressed]="categoria === c.value" (click)="setCategoria(c.value)">
+    <i class="bi {{ c.icon }}" aria-hidden="true"></i> {{ c.label }}
+  </button>
+</div>
+<form class="catalogo__filtros" (ngSubmit)="cargar()">
+  <label for="ej-buscar">Buscar ejercicio</label>
+  <div class="catalogo__busqueda">
+    <input id="ej-buscar" class="catalogo__input" name="buscar" type="search" maxlength="80" [(ngModel)]="buscar" placeholder="Ej: Jalón al pecho, plancha o bicicleta" />
+    <app-ui-button variant="secondary" type="submit">Buscar</app-ui-button>
+  </div>
+  <label for="ej-musculo">Grupo muscular</label>
+  <select id="ej-musculo" class="catalogo__input" name="musculo" [(ngModel)]="musculo" (ngModelChange)="cargar()">
+    <option value="">Todos los grupos</option>
+    <option *ngFor="let g of grupos" [value]="g">{{ etiquetaMusculo(g) }}</option>
+  </select>
+</form>
+<p *ngIf="cargando" class="catalogo__estado" role="status">Cargando ejercicios…</p>
+<app-ui-empty-state *ngIf="error" icon="bi-wifi-off" title="No pudimos cargar los ejercicios" [message]="error">
+  <app-ui-button variant="secondary" (clicked)="cargar()">Reintentar</app-ui-button>
+</app-ui-empty-state>
+<app-ui-empty-state *ngIf="!cargando && !error && !ejercicios.length" icon="bi-search" title="Sin ejercicios para mostrar" message="Prueba con otra categoría, grupo muscular o búsqueda."></app-ui-empty-state>
+<div class="catalogo__lista">
+  <article *ngFor="let e of ejercicios; trackBy: trackById" class="catalogo__card">
+    <a class="catalogo__enlace" [routerLink]="gestion ? ['/admin/catalogo', e.id, 'editar'] : ['/ejercicios', e.id]">
+      <app-ui-badge variant="primary">{{ etiquetaCategoria(e.categoria) }}</app-ui-badge>
+      <h2>{{ e.nombre }}</h2>
+      <div class="catalogo__etiquetas"><app-ui-badge *ngFor="let g of e.grupos_musculares">{{ etiquetaMusculo(g) }}</app-ui-badge></div>
+      <p *ngFor="let r of e.recursos" class="catalogo__recurso"><i class="bi bi-geo-alt" aria-hidden="true"></i> {{ r.nombre }} <strong *ngIf="r.numero_maquina">· N.º {{ r.numero_maquina }}</strong></p>
+      <span class="catalogo__ver">{{ gestion ? 'Editar ejercicio' : 'Ver ejercicio' }} <i class="bi bi-arrow-right" aria-hidden="true"></i></span>
+    </a>
+    <a *ngIf="gestion" class="catalogo__vista-previa" [routerLink]="['/ejercicios', e.id]">Ver ficha del alumno</a>
+  </article>
+</div>
+<div *ngIf="hayMas && !error" class="catalogo__mas"><app-ui-button variant="secondary" [loading]="cargando" [disabled]="cargando" (clicked)="cargar(true)">Cargar más</app-ui-button></div>

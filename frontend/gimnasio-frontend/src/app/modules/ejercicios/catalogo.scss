@@ -1,0 +1,41 @@
+@import "tokens";
+.catalogo__acciones { display: flex; gap: $space-2; flex-wrap: wrap; margin-bottom: $space-4; }
+.catalogo__acciones--fila { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); --ui-button-padding-x: #{$space-2}; --ui-button-font-size: #{$fs-sm}; }
+.catalogo__acciones--fila app-ui-button { min-width: 0; }
+.catalogo__categorias { display: flex; gap: $space-2; overflow-x: auto; padding-bottom: $space-2; margin-bottom: $space-3; }
+.catalogo__chip { flex: 0 0 auto; min-height: 40px; padding: 8px 14px; border: 1px solid $color-border; border-radius: $radius-full; background: $color-surface; color: $color-text-muted; font: inherit; font-size: $fs-sm; cursor: pointer; }
+.catalogo__chip--activo { background: $color-primary-soft; color: $color-primary; border-color: $color-primary; }
+.catalogo__filtros, .catalogo__form { display: flex; flex-direction: column; gap: $space-2; margin-bottom: $space-5; }
+.catalogo__form { gap: $space-3; }
+.catalogo__form label, .catalogo__filtros label { color: $color-text-muted; font-size: $fs-sm; }
+.catalogo__input { width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; border: 1px solid $color-border; border-radius: 10px; background: white; color: $color-text; font: inherit; }
+.catalogo__input:focus-visible { outline: 2px solid $color-primary; outline-offset: 2px; }
+textarea.catalogo__input { resize: vertical; }
+.catalogo__busqueda { display: flex; gap: $space-2; align-items: center; }
+.catalogo__lista { display: grid; gap: $space-3; }
+.catalogo__card { border: 1px solid $color-border; border-radius: $radius-lg; background: $color-surface; overflow: hidden; }
+.catalogo__enlace { display: block; padding: $space-4; text-decoration: none; color: $color-text; }
+.catalogo__enlace:focus-visible { outline: 2px solid $color-primary; outline-offset: -3px; }
+.catalogo__card h2, .catalogo__seccion h2 { font-size: $fs-lg; margin: $space-2 0 $space-3; overflow-wrap: anywhere; }
+.catalogo__card h3 { font-size: $fs-base; margin: 0; overflow-wrap: anywhere; }
+.catalogo__etiquetas { display: flex; gap: $space-2; flex-wrap: wrap; margin-bottom: $space-3; }
+.catalogo__recurso, .catalogo__meta { color: $color-text-muted; font-size: $fs-sm; margin: $space-2 0; overflow-wrap: anywhere; }
+.catalogo__recurso strong { color: $color-primary; }
+.catalogo__ver { display: flex; gap: $space-2; align-items: center; color: $color-primary; margin-top: $space-3; font-size: $fs-sm; font-weight: $fw-semibold; }
+.catalogo__vista-previa { display: block; padding: $space-3 $space-4; border-top: 1px solid $color-border; color: $color-primary; font-size: $fs-sm; }
+.catalogo__mas, .catalogo__estado { text-align: center; padding: $space-4; }
+.catalogo__seccion { margin: $space-5 0; }
+.catalogo__descripcion { white-space: pre-line; overflow-wrap: anywhere; }
+.catalogo__card--recurso { padding: $space-4; margin-top: $space-3; }
+.catalogo__cabecera { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: $space-2; }
+.catalogo__imagen { display: block; max-width: 100%; max-height: 280px; margin: $space-4 auto; border-radius: $radius-lg; object-fit: contain; }
+.catalogo__video { aspect-ratio: 16 / 9; margin: $space-4 0; }
+.catalogo__video iframe { width: 100%; height: 100%; border-radius: $radius-lg; }
+.catalogo__error { color: $color-danger; font-size: $fs-sm; }
+.catalogo__nota { color: $color-text-muted; font-size: $fs-sm; }
+.catalogo__seleccion { display: flex; flex-wrap: wrap; gap: $space-2; }
+.catalogo__seleccion button { padding: 6px 10px; border: 1px solid $color-border; border-radius: $radius-full; background: $color-primary-soft; color: $color-text; font: inherit; font-size: $fs-sm; cursor: pointer; }
+.catalogo__opcion { display: flex; align-items: center; gap: $space-3; padding: $space-3; border: 1px solid $color-border; border-radius: 10px; background: $color-surface; color: $color-text !important; }
+.catalogo__opcion input { width: 20px; height: 20px; accent-color: $color-primary-default; }
+.catalogo__opcion span { overflow-wrap: anywhere; }
+.catalogo__grupos { display: flex; flex-wrap: wrap; gap: $space-2; }

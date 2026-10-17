@@ -4,7 +4,7 @@
 </app-ui-page-header>
 
 <div class="rl__cta">
-  <app-ui-button variant="secondary" routerLink="/profesor/publicaciones">
+  <app-ui-button variant="secondary" [block]="true" routerLink="/profesor/publicaciones">
     <i class="bi bi-globe" aria-hidden="true"></i> Mis publicaciones
   </app-ui-button>
   <app-ui-button variant="primary" [block]="true" (clicked)="irANueva()">

@@ -20,7 +20,7 @@ export function roleGuard(rolesPermitidos: UserRole[]): CanActivateFn {
         if (auth.tieneRol(...rolesPermitidos)) {
           return true;
         }
-        return router.createUrlTree(['/maquinas']);
+        return router.createUrlTree(['/ejercicios']);
       }),
     );
   };

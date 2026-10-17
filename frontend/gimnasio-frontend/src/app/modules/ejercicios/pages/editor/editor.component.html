@@ -1,0 +1,35 @@
+<app-ui-page-header [title]="id ? 'Editar ejercicio' : 'Nuevo ejercicio'" subtitle="Asocia el ejercicio con las máquinas, el equipamiento o los espacios donde se realiza"></app-ui-page-header>
+<p *ngIf="cargando" class="catalogo__estado" role="status">Cargando ejercicio…</p>
+<p *ngIf="error" class="catalogo__error" role="alert">{{ error }}</p>
+<form *ngIf="!cargando && !error" class="catalogo__form" (ngSubmit)="guardar()" #form="ngForm">
+  <label for="ed-nombre">Nombre del ejercicio</label>
+  <input id="ed-nombre" name="nombre" class="catalogo__input" [(ngModel)]="nombre" required maxlength="100" placeholder="Ej: Jalón al pecho" />
+  <label for="ed-categoria">Categoría</label>
+  <select id="ed-categoria" name="categoria" class="catalogo__input" [(ngModel)]="categoria"><option *ngFor="let c of categorias" [value]="c.value">{{ c.label }}</option></select>
+  <label for="ed-descripcion">Instrucciones (opcional)</label>
+  <textarea id="ed-descripcion" name="descripcion" class="catalogo__input" [(ngModel)]="descripcion" rows="4" maxlength="2000"></textarea>
+  <label for="ed-video">Video de YouTube (opcional)</label>
+  <input id="ed-video" name="video" class="catalogo__input" [(ngModel)]="videoUrl" maxlength="500" placeholder="https://www.youtube.com/embed/ID" />
+  <label for="ed-imagen">Imagen (opcional)</label>
+  <input id="ed-imagen" name="imagen" class="catalogo__input" [(ngModel)]="imagenUrl" maxlength="1000" placeholder="https://..." />
+  <span>Grupos musculares (opcional)</span>
+  <div class="catalogo__grupos"><button *ngFor="let g of grupos" type="button" class="catalogo__chip" [class.catalogo__chip--activo]="gruposSeleccionados.includes(g)" [attr.aria-pressed]="gruposSeleccionados.includes(g)" (click)="toggleGrupo(g)">{{ etiquetaMusculo(g) }}</button></div>
+  <h2>Recursos asociados</h2>
+  <p class="catalogo__nota">Asocia al menos un recurso. Para ejercicios libres puedes elegir una zona de entrenamiento o equipamiento. Los ejercicios en máquina requieren una máquina.</p>
+  <div class="catalogo__seleccion"><button *ngFor="let r of recursosSeleccionados" type="button" (click)="toggleRecurso(r)" [attr.aria-label]="'Quitar ' + r.nombre">{{ r.nombre }}<span *ngIf="r.numero_maquina"> · N.º {{ r.numero_maquina }}</span> ×</button></div>
+  <label for="ed-recurso">Buscar recurso por nombre o número</label>
+  <div class="catalogo__busqueda"><input id="ed-recurso" name="buscarRecurso" class="catalogo__input" [(ngModel)]="buscarRecurso" maxlength="80" (keydown.enter)="$event.preventDefault(); cargarRecursos()" /><app-ui-button variant="secondary" (clicked)="cargarRecursos()">Buscar</app-ui-button></div>
+  <p *ngIf="cargandoRecursos" role="status">Cargando recursos…</p>
+  <div *ngIf="errorRecursos" class="catalogo__error" role="alert">{{ errorRecursos }} <app-ui-button variant="secondary" (clicked)="cargarRecursos()">Reintentar</app-ui-button></div>
+  <label *ngFor="let r of recursos" class="catalogo__opcion">
+    <input type="checkbox" [checked]="seleccionados.has(r.id)" [disabled]="!seleccionados.has(r.id) && seleccionados.size >= 30" (change)="toggleRecurso(r)" />
+    <span>{{ r.nombre }}<strong *ngIf="r.numero_maquina"> · N.º {{ r.numero_maquina }}</strong><br /><small>{{ etiquetaRecurso(r.tipo) }}</small></span>
+  </label>
+  <p *ngIf="!cargandoRecursos && !errorRecursos && !recursos.length" class="catalogo__nota">No hay recursos que coincidan. Puedes crearlos desde <a routerLink="/admin/catalogo/recursos">Recursos</a>.</p>
+  <app-ui-button *ngIf="hayMasRecursos && !errorRecursos" variant="secondary" [disabled]="cargandoRecursos" (clicked)="cargarRecursos(true)">Cargar más recursos</app-ui-button>
+  <p *ngIf="errorGuardar" class="catalogo__error" role="alert">{{ errorGuardar }}</p>
+  <div class="catalogo__acciones catalogo__acciones--fila">
+    <app-ui-button variant="secondary" [block]="true" routerLink="/admin/catalogo">Cancelar</app-ui-button>
+    <app-ui-button variant="primary" type="submit" [block]="true" [loading]="guardando" [disabled]="!puedeGuardar || form.invalid === true">Guardar ejercicio</app-ui-button>
+  </div>
+</form>

@@ -3,9 +3,9 @@
   [subtitle]="gestion ? 'Comparte entrenamientos con tu gimnasio' : 'Descubre entrenamientos de los profesores de tu gimnasio'">
 </app-ui-page-header>
 
-<div *ngIf="gestion" class="catalogo__acciones">
-  <app-ui-button variant="secondary" routerLink="/profesor/rutinas">Rutinas asignadas</app-ui-button>
-  <app-ui-button variant="primary" routerLink="/profesor/publicaciones/nueva">
+<div *ngIf="gestion" class="catalogo__acciones catalogo__acciones--principales">
+  <app-ui-button variant="secondary" [block]="true" routerLink="/profesor/rutinas">Rutinas asignadas</app-ui-button>
+  <app-ui-button variant="primary" [block]="true" routerLink="/profesor/publicaciones/nueva">
     <i class="bi bi-plus-lg" aria-hidden="true"></i> Publicar rutina
   </app-ui-button>
 </div>

@@ -18,6 +18,7 @@ const routes: Routes = [
   { path: 'reportes', component: ReportesComponent },
   { path: 'rutinas', component: RutinasComponent },
   { path: 'calendario', component: CalendarioComponent },
+  { path: 'catalogo', loadChildren: () => import('../ejercicios/gestion-catalogo.module').then(m => m.GestionCatalogoModule) },
   { path: 'maquinas', component: MaquinasListaComponent },
   { path: 'maquinas/:id', component: MaquinaDetalleComponent },
   { path: 'perfil', component: PerfilComponent },

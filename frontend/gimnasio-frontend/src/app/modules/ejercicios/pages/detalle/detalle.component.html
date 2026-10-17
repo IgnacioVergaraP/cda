@@ -1,0 +1,19 @@
+<p *ngIf="cargando" class="catalogo__estado" role="status">Cargando ejercicio…</p>
+<app-ui-empty-state *ngIf="error" icon="bi-exclamation-triangle" title="No pudimos cargar el ejercicio" [message]="error"><app-ui-button variant="secondary" (clicked)="cargar()">Reintentar</app-ui-button></app-ui-empty-state>
+<ng-container *ngIf="!cargando && ejercicio">
+  <app-ui-page-header [title]="ejercicio.nombre" [subtitle]="etiquetaCategoria(ejercicio.categoria)"></app-ui-page-header>
+  <div class="catalogo__etiquetas"><app-ui-badge *ngFor="let g of ejercicio.grupos_musculares" variant="primary">{{ etiquetaMusculo(g) }}</app-ui-badge></div>
+  <img *ngIf="ejercicio.imagen_url" class="catalogo__imagen" [src]="ejercicio.imagen_url" [alt]="ejercicio.nombre" loading="lazy" />
+  <div *ngIf="video" class="catalogo__video"><iframe [src]="video" [title]="'Video de ' + ejercicio.nombre" frameborder="0" allowfullscreen loading="lazy"></iframe></div>
+  <section class="catalogo__seccion"><h2>Cómo realizarlo</h2><p class="catalogo__descripcion">{{ ejercicio.descripcion || 'Este ejercicio todavía no tiene instrucciones.' }}</p></section>
+  <section class="catalogo__seccion">
+    <h2>Recursos asociados</h2>
+    <article *ngFor="let r of ejercicio.recursos" class="catalogo__card catalogo__card--recurso">
+      <div class="catalogo__cabecera"><h3>{{ r.nombre }}</h3><app-ui-badge *ngIf="r.numero_maquina" variant="primary">N.º {{ r.numero_maquina }}</app-ui-badge></div>
+      <p class="catalogo__meta">{{ etiquetaRecurso(r.tipo) }}</p>
+      <p *ngIf="r.descripcion" class="catalogo__descripcion">{{ r.descripcion }}</p>
+    </article>
+  </section>
+  <section *ngIf="ejercicio.grupos_musculares.length" class="catalogo__seccion"><h2>Músculos trabajados</h2><app-muscle-map [muscles]="ejercicio.grupos_musculares"></app-muscle-map></section>
+  <app-ui-button *ngIf="auth.tieneRol('gimnasio')" variant="secondary" [routerLink]="['/admin/catalogo', ejercicio.id, 'editar']">Editar ejercicio</app-ui-button>
+</ng-container>

@@ -7,10 +7,10 @@
   gap: 8px;
 
   min-height: 48px;
-  padding: 0 24px;
+  padding: 0 var(--ui-button-padding-x, 24px);
   font-family: $font-family-display;
 
-  font-size: $fs-base;
+  font-size: var(--ui-button-font-size, #{$fs-base});
   font-weight: $fw-semibold;
   letter-spacing: 0.01em;
 

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 
 const MAIN_MENU_ROUTES = new Set([
   '/maquinas',
+  '/ejercicios',
   '/rutinas',
   '/progreso',
   '/usuario',

@@ -5,7 +5,7 @@ import { authGuard } from './modules/auth/guards/auth.guard';
 import { roleGuard } from './modules/auth/guards/role.guard';
 
 const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'maquinas' },
+  { path: '', pathMatch: 'full', redirectTo: 'ejercicios' },
 
   {
     path: 'auth',
@@ -20,6 +20,11 @@ const routes: Routes = [
       import('./modules/admin/admin.module').then(m => m.AdminModule),
   },
 
+  {
+    path: 'ejercicios',
+    canActivate: [authGuard],
+    loadChildren: () => import('./modules/ejercicios/ejercicios.module').then(m => m.EjerciciosModule),
+  },
   {
     path: 'maquinas',
     canActivate: [authGuard],
@@ -56,7 +61,7 @@ const routes: Routes = [
       import('./modules/profesor/profesor.module').then(m => m.ProfesorModule),
   },
 
-  { path: '**', redirectTo: 'maquinas' },
+  { path: '**', redirectTo: 'ejercicios' },
 ];
 
 @NgModule({

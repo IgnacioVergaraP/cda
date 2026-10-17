@@ -67,6 +67,8 @@ class MockAuth:
         from app.blueprints.profesor import services as profesor_services
         from app.blueprints.admin import services as admin_services
         from app.blueprints.maquinas import services as maquinas_services
+        from app.blueprints.ejercicios import services as ejercicios_services
+        from app.repositories.mock_catalogo import MockCatalogoRepository
         from app.blueprints.rutinas import services as rutinas_services
         from app.blueprints.progreso import services as progreso_services
 
@@ -96,6 +98,8 @@ class MockAuth:
             "_progreso_repo",
             lambda: mock_progreso,
         )
+
+        self._monkeypatch.setattr(ejercicios_services, "_repo", MockCatalogoRepository(mock_maquinas))
 
         # maquinas
         self._monkeypatch.setattr(maquinas_services, "_repo", mock_maquinas)

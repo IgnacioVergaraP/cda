@@ -30,7 +30,7 @@ export class BottomNavComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   private readonly navAlumno: NavItem[] = [
-    { label: 'Máquinas', icon: 'bi-grid',         route: '/maquinas', gimnasioTab: 'maquinas' },
+    { label: 'Ejercicios', icon: 'bi-grid',        route: '/ejercicios', gimnasioTab: 'maquinas' },
     { label: 'Rutina',   icon: 'bi-list-check',   route: '/rutinas', gimnasioTab: 'rutinas' },
     { label: 'Explorar', icon: 'bi-compass', route: '/explorar', gimnasioTab: 'rutinas' },
     { label: 'Progreso', icon: 'bi-graph-up',     route: '/progreso', gimnasioTab: 'progreso' },

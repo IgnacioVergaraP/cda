@@ -24,6 +24,7 @@ export class AdminSidebarComponent implements OnInit, OnDestroy {
   readonly items: SidebarItem[] = [
     { label: 'Inicio',        icon: 'bi-house',           route: '/admin'             },
     { label: 'Dashboard',     icon: 'bi-bar-chart',       route: '/admin/dashboard'   },
+    { label: 'Ejercicios', icon: 'bi-collection', route: '/admin/catalogo' },
     { label: 'Mantenciones',  icon: 'bi-tools',           route: '/admin/maquinas'    },
     { label: 'Solicitudes',   icon: 'bi-inbox',           route: '/admin/solicitudes' },
     { label: 'Reportes',      icon: 'bi-flag',            route: '/admin/reportes'    },
