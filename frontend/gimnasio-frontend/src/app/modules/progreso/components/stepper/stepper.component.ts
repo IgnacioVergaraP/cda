@@ -1,7 +1,11 @@
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-stepper',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './stepper.component.html',
   styleUrls: ['./stepper.component.scss'],
 })
@@ -46,7 +50,7 @@ export class StepperComponent {
 
   confirmarEdicion(): void {
     const v = Number(this.valorInput);
-    if (!Number.isNaN(v) && v >= this.min && v <= this.max) {
+    if (Number.isFinite(v) && v >= this.min && v <= this.max) {
       this.emitir(v);
       this.valorEditado.emit(v);
     }
@@ -59,7 +63,7 @@ export class StepperComponent {
 
   private emitir(v: number): void {
     // Redondeo a 1 decimal para evitar 42.499999999
-    const redondeado = Math.round(v * 10) / 10;
+    const redondeado = Math.min(this.max, Math.max(this.min, Math.round(v * 10) / 10));
     this.valor = redondeado;
     this.valorChange.emit(redondeado);
   }

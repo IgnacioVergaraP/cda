@@ -182,3 +182,5 @@
 @keyframes subir-spin {
   to { transform: rotate(360deg); }
 }
+.subir__recursos { display: grid; gap: 12px; border: 1px solid #ddd; border-radius: 12px; padding: 16px; min-width: 0; }
+.subir__recurso { display: flex; align-items: center; gap: 8px; min-height: 40px; }

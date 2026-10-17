@@ -1,3 +1,5 @@
+import { EjercicioCatalogo } from '../../ejercicios/models/catalogo.model';
+
 export type TipoEjercicio = 'maquina' | 'libre';
 
 export interface MaquinaResumen {
@@ -9,12 +11,21 @@ export interface MaquinaResumen {
   video_url: string;
 }
 
+export interface PrescripcionCardio {
+  intensidad?: string | null;
+  duracion_minutos?: number | null;
+  distancia_km?: number | null;
+}
+
 export interface Ejercicio {
   id: string;
   tipo: TipoEjercicio;
   series: number;
   repeticiones: string;
   peso_sugerido: string | null;
+  ejercicio_catalogo_id?: string | null;
+  prescripcion_cardio?: PrescripcionCardio | null;
+  catalogo?: EjercicioCatalogo | null;
 
   maquina_id?: string;
   maquina?: MaquinaResumen | null;
@@ -43,4 +54,11 @@ export interface Rutina {
   fecha_creacion: string;
   fecha_modificacion: string | null;
   ejercicios: Ejercicio[];
+}
+
+export function resumenCardio(e: Pick<Ejercicio, 'prescripcion_cardio' | 'repeticiones'>): string {
+  const p = e.prescripcion_cardio;
+  if (!p) return e.repeticiones?.trim() || 'Cardio';
+  return [p.intensidad, p.duracion_minutos != null ? `${p.duracion_minutos} min` : '',
+    p.distancia_km != null ? `${p.distancia_km} km` : ''].filter(Boolean).join(' · ') || 'Cardio';
 }

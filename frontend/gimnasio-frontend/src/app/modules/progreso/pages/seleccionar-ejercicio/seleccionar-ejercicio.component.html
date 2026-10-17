@@ -1,97 +1,12 @@
-<app-ui-page-header
-  title="Registrar serie"
-  subtitle="Elegí un ejercicio del catálogo o cargá uno libre">
-</app-ui-page-header>
-
-<!-- Ejercicio libre -->
+<app-ui-page-header title="Registrar entrenamiento" subtitle="Elige un ejercicio de fuerza o cardio"></app-ui-page-header>
+<section class="seleccionar__catalogo">
+  <app-ejercicio-picker (seleccionChange)="elegirEjercicio($event)"></app-ejercicio-picker>
+</section>
 <app-ui-card padding="md">
-  <p class="seleccionar__label">Ejercicio libre</p>
-  <p class="seleccionar__ayuda">
-    Para ejercicios que no están en el catálogo (ej. "Saltos al cajón").
-  </p>
+  <p class="seleccionar__label">Ejercicio personalizado</p>
+  <p class="seleccionar__ayuda">Si el ejercicio de fuerza no está en el catálogo, puedes escribir su nombre.</p>
   <div class="seleccionar__libre">
-    <input
-      type="text"
-      class="seleccionar__input"
-      placeholder="Nombre del ejercicio"
-      [(ngModel)]="nombreLibre"
-      (keydown.enter)="confirmarLibre()" />
-    <app-ui-button
-      variant="primary"
-      [disabled]="!nombreLibre.trim()"
-      (clicked)="confirmarLibre()">
-      Continuar
-    </app-ui-button>
+    <input type="text" class="seleccionar__input" aria-label="Nombre del ejercicio personalizado" maxlength="100" placeholder="Nombre del ejercicio" [(ngModel)]="nombreLibre" (keydown.enter)="confirmarLibre()" />
+    <app-ui-button variant="primary" [disabled]="!nombreLibre.trim()" (clicked)="confirmarLibre()">Continuar</app-ui-button>
   </div>
 </app-ui-card>
-
-<!-- Catálogo -->
-<section class="seleccionar__catalogo">
-  <h2 class="seleccionar__section-title">O elegí del catálogo</h2>
-
-  <input
-    type="search"
-    class="seleccionar__search"
-    placeholder="Buscar máquina..."
-    [(ngModel)]="busqueda"
-    (ngModelChange)="onBusquedaChange()" />
-
-  <div class="seleccionar__chips">
-    <button
-      type="button"
-      class="seleccionar__chip"
-      [class.seleccionar__chip--active]="!filtro"
-      (click)="onFiltroChange(null)">
-      Todos
-    </button>
-    <button
-      *ngFor="let g of grupos"
-      type="button"
-      class="seleccionar__chip"
-      [class.seleccionar__chip--active]="filtro === g"
-      (click)="onFiltroChange(g)">
-      {{ etiqueta(g) }}
-    </button>
-  </div>
-
-  <div *ngIf="cargando" class="seleccionar__loading">
-    <span class="spinner" aria-hidden="true"></span>
-    <span>Cargando catálogo…</span>
-  </div>
-
-  <app-ui-empty-state
-    *ngIf="!cargando && errorMensaje"
-    icon="bi-wifi-off"
-    title="No pudimos cargar el catálogo"
-    [message]="errorMensaje">
-    <app-ui-button variant="secondary" (clicked)="reintentar()">
-      Reintentar
-    </app-ui-button>
-  </app-ui-empty-state>
-
-  <app-ui-empty-state
-    *ngIf="!cargando && !errorMensaje && filtradas.length === 0"
-    icon="bi-search"
-    title="Sin resultados"
-    message="Prueba con otro filtro o busca por otro nombre.">
-  </app-ui-empty-state>
-
-  <div *ngIf="!cargando && filtradas.length > 0" class="seleccionar__lista">
-    <button
-      *ngFor="let m of filtradas; trackBy: trackById"
-      type="button"
-      class="seleccionar__item"
-      (click)="elegirMaquina(m)">
-      <div class="seleccionar__item-thumb">
-        <app-muscle-map [muscles]="m.grupos_musculares" [primaryOnly]="true" [compact]="true"></app-muscle-map>
-      </div>
-      <div class="seleccionar__item-body">
-        <p class="seleccionar__item-nombre">{{ m.nombre }}</p>
-        <p class="seleccionar__item-tags">
-          {{ m.grupos_musculares.join(' · ') }}
-        </p>
-      </div>
-      <i class="bi bi-chevron-right seleccionar__item-chevron" aria-hidden="true"></i>
-    </button>
-  </div>
-</section>

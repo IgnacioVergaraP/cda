@@ -1,150 +1,35 @@
 <header class="registrar__header">
-  <button
-    type="button"
-    class="registrar__back"
-    aria-label="Volver"
-    (click)="cancelar()">
-    <i class="bi bi-arrow-left" aria-hidden="true"></i>
-  </button>
-
-  <div class="registrar__header-titles">
-    <h1 class="registrar__titulo">{{ nombreVisible }}</h1>
-    <p class="registrar__indicador">{{ indicadorSerie }}</p>
-  </div>
-
+  <button type="button" class="registrar__back" aria-label="Volver" (click)="cancelar()"><i class="bi bi-arrow-left" aria-hidden="true"></i></button>
+  <div class="registrar__header-titles"><h1 class="registrar__titulo">{{ nombreVisible || 'Registrar entrenamiento' }}</h1><p class="registrar__indicador">{{ indicadorSerie }}</p></div>
   <span class="registrar__header-spacer" aria-hidden="true"></span>
 </header>
-
 <div class="registrar__body">
-
-  <p *ngIf="pesoSugerido">Peso sugerido: {{ pesoSugerido }}</p>
-
-  <section class="registrar__steppers">
-    <app-stepper
-      label="Peso"
-      sufijo="kg"
-      [valor]="peso"
-      [paso]="2.5"
-      [min]="0"
-      [max]="500"
-      (valorChange)="onPesoChange($event)">
-    </app-stepper>
-
-    <app-stepper
-      label="Repeticiones"
-      sufijo="reps"
-      [valor]="repeticiones"
-      [paso]="1"
-      [min]="1"
-      [max]="200"
-      (valorChange)="onRepsChange($event)">
-    </app-stepper>
+  <p *ngIf="cargando" role="status">Cargando ejercicio…</p>
+  <p *ngIf="pesoSugerido && !esCardio">Peso sugerido: {{ pesoSugerido }}</p>
+  <app-metricas-registro [conSteppers]="true" *ngIf="!cargando && (!catalogoId || ejercicio)" [(valor)]="metricas"></app-metricas-registro>
+  <fieldset *ngIf="ejercicio" class="registrar__recursos">
+    <legend>Recursos que utilizaste</legend>
+    <label *ngFor="let r of ejercicio.recursos"><input type="checkbox" [checked]="recursosSeleccionados.includes(r.id)" (change)="toggleRecurso(r.id)" /> {{ r.nombre }}<strong *ngIf="r.numero_maquina"> · N.º {{ r.numero_maquina }}</strong></label>
+    <p *ngIf="!recursosSeleccionados.length">Selecciona al menos un recurso.</p>
+  </fieldset>
+  <div *ngIf="errorMensaje" class="registrar__error" role="alert">{{ errorMensaje }}</div>
+  <app-ui-button *ngIf="catalogoId && !cargando && !ejercicio" variant="secondary" (clicked)="cargarEjercicio()">Reintentar</app-ui-button>
+  <div *ngIf="exitoMensaje" class="registrar__exito" role="status">{{ exitoMensaje }}</div>
+  <app-ui-button variant="primary" [block]="true" [loading]="guardando" [disabled]="!puedeRegistrar" (clicked)="registrarSerie()">{{ esCardio ? 'Registrar cardio' : 'Registrar serie' }}</app-ui-button>
+  <section *ngIf="series.length" class="registrar__series">
+    <h2 class="registrar__series-titulo">Registros guardados ({{ series.length }})</h2>
+    <ul class="registrar__series-lista"><li *ngFor="let s of series; trackBy: trackBySerie" class="registrar__serie">
+      <i class="bi bi-check-circle-fill registrar__serie-icon" aria-hidden="true"></i><span class="registrar__serie-num">#{{ s.numero_serie }}</span>
+      <span class="registrar__serie-resumen">{{ resumenRegistro(s) }}</span>
+      <button type="button" class="registrar__serie-editar" aria-label="Editar registro" (click)="abrirEdicion(s)"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+    </li></ul>
   </section>
-
-  <div *ngIf="errorMensaje" class="registrar__error" role="alert">
-    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
-    <span>{{ errorMensaje }}</span>
-  </div>
-
-  <div *ngIf="exitoMensaje" class="registrar__exito" role="status">
-    <i class="bi bi-check-circle" aria-hidden="true"></i>
-    <span>{{ exitoMensaje }}</span>
-  </div>
-
-  <app-ui-button
-    variant="primary"
-    [block]="true"
-    [loading]="guardando"
-    [disabled]="!puedeRegistrar"
-    (clicked)="registrarSerie()">
-    <i class="bi bi-check2-square" aria-hidden="true"></i>
-    Registrar serie
-  </app-ui-button>
-
-  <section *ngIf="series.length > 0" class="registrar__series">
-    <h2 class="registrar__series-titulo">
-      Series registradas ({{ series.length }})
-    </h2>
-
-    <ul class="registrar__series-lista">
-      <li
-        *ngFor="let s of series; trackBy: trackBySerie"
-        class="registrar__serie">
-        <i class="bi bi-check-circle-fill registrar__serie-icon" aria-hidden="true"></i>
-        <span class="registrar__serie-num">#{{ s.numero_serie }}</span>
-        <span class="registrar__serie-resumen">{{ s.peso }} × {{ s.repeticiones }} reps</span>
-
-        <button
-          type="button"
-          class="registrar__serie-editar"
-          aria-label="Editar serie"
-          (click)="abrirEdicion(s)">
-          <i class="bi bi-pencil" aria-hidden="true"></i>
-        </button>
-      </li>
-    </ul>
-  </section>
-
-  <div class="registrar__footer">
-    <app-ui-button
-      variant="secondary"
-      [block]="true"
-      (clicked)="terminar()">
-      {{ series.length > 0 ? 'Terminar sesión' : 'Cancelar' }}
-    </app-ui-button>
-  </div>
-
+  <div class="registrar__footer"><app-ui-button variant="secondary" [block]="true" (clicked)="terminar()">{{ series.length ? 'Terminar sesión' : 'Cancelar' }}</app-ui-button></div>
 </div>
-
-<!-- Sheet de edición -->
-<app-ui-sheet
-  [visible]="edicionVisible"
-  title="Editar serie"
-  (closed)="cerrarEdicion()">
-
+<app-ui-sheet [visible]="edicionVisible" title="Editar registro" (closed)="cerrarEdicion()">
   <ng-container *ngIf="serieEnEdicion">
-
-    <p class="registrar__edicion-info">
-      Serie #{{ serieEnEdicion.numero_serie }}
-    </p>
-
-    <section class="registrar__steppers">
-      <app-stepper
-        label="Peso"
-        sufijo="kg"
-        [valor]="pesoEdicion"
-        [paso]="2.5"
-        [min]="0"
-        [max]="500"
-        (valorChange)="onPesoEdicionChange($event)">
-      </app-stepper>
-
-      <app-stepper
-        label="Repeticiones"
-        sufijo="reps"
-        [valor]="repsEdicion"
-        [paso]="1"
-        [min]="1"
-        [max]="200"
-        (valorChange)="onRepsEdicionChange($event)">
-      </app-stepper>
-    </section>
-
-    <div *ngIf="errorEdicion" class="registrar__error" role="alert">
-      <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
-      <span>{{ errorEdicion }}</span>
-    </div>
-
-    <div class="registrar__edicion-actions">
-      <app-ui-button
-        variant="primary"
-        [block]="true"
-        [loading]="guardandoEdicion"
-        (clicked)="guardarEdicion()">
-        Guardar cambios
-      </app-ui-button>
-    </div>
-
+    <app-metricas-registro [conSteppers]="true" [(valor)]="metricasEdicion"></app-metricas-registro>
+    <p *ngIf="errorEdicion" class="registrar__error" role="alert">{{ errorEdicion }}</p>
+    <div class="registrar__edicion-actions"><app-ui-button variant="primary" [block]="true" [loading]="guardandoEdicion" [disabled]="!metricasValidas(metricasEdicion) || guardandoEdicion" (clicked)="guardarEdicion()">Guardar cambios</app-ui-button></div>
   </ng-container>
-
 </app-ui-sheet>

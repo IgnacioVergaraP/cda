@@ -16,6 +16,12 @@ textarea.catalogo__input { resize: vertical; }
 .catalogo__card { border: 1px solid $color-border; border-radius: $radius-lg; background: $color-surface; overflow: hidden; }
 .catalogo__enlace { display: block; padding: $space-4; text-decoration: none; color: $color-text; }
 .catalogo__enlace:focus-visible { outline: 2px solid $color-primary; outline-offset: -3px; }
+.catalogo__enlace--ejercicio { display: flex; align-items: center; gap: $space-3; }
+.catalogo__musculo { flex: 0 0 56px; width: 56px; height: 56px; border-radius: $radius-sm; overflow: hidden; background: $color-bg-subtle; }
+.catalogo__musculo app-muscle-map { height: 100%; }
+.catalogo__contenido { flex: 1; min-width: 0; }
+.catalogo__card .catalogo__contenido h2 { margin: 0 0 $space-2; }
+.catalogo__contenido .catalogo__etiquetas { align-items: center; gap: 6px; margin-bottom: 0; }
 .catalogo__card h2, .catalogo__seccion h2 { font-size: $fs-lg; margin: $space-2 0 $space-3; overflow-wrap: anywhere; }
 .catalogo__card h3 { font-size: $fs-base; margin: 0; overflow-wrap: anywhere; }
 .catalogo__etiquetas { display: flex; gap: $space-2; flex-wrap: wrap; margin-bottom: $space-3; }

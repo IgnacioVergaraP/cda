@@ -9,19 +9,23 @@ import { PrincipalComponent } from './pages/principal/principal.component';
 import { RegistrarComponent } from './pages/registrar/registrar.component';
 import { SeleccionarEjercicioComponent } from './pages/seleccionar-ejercicio/seleccionar-ejercicio.component';
 import { StepperComponent } from './components/stepper/stepper.component';
+import { MetricasRegistroComponent } from './components/metricas-registro/metricas-registro.component';
+import { EjercicioPickerComponent } from '../profesor/components/ejercicio-picker/ejercicio-picker.component';
 
 @NgModule({
   declarations: [
     PrincipalComponent,
     RegistrarComponent,
     SeleccionarEjercicioComponent,
-    StepperComponent,
   ],
   imports: [
     CommonModule,
     FormsModule,
     SharedModule,
     ProgresoRoutingModule,
+    MetricasRegistroComponent,
+    StepperComponent,
+    EjercicioPickerComponent,
   ],
 })
 export class ProgresoModule {}

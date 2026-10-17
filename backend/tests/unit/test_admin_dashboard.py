@@ -1,5 +1,5 @@
 """
-Tests del dashboard de uso del admin (analytics de máquinas).
+Tests del dashboard de uso del admin (recursos informados en entrenamientos).
 """
 
 
@@ -22,7 +22,11 @@ def test_dashboard_default(client, mock_auth):
     data = resp.get_json()["data"]
     assert data["rango"] == "30d"
     assert data["dias"] == 30
-    assert "total_series" in data
+    assert "total_registros" in data
+    assert data["registros_sin_recursos"] == data["total_registros"]
+    assert data["registros_con_recursos"] == 0
+    assert data["top_usadas"] == []
+    assert all(r["cantidad_registros"] == 0 for r in data["menos_usadas"])
     assert "top_usadas" in data
     assert "menos_usadas" in data
     assert isinstance(data["top_usadas"], list)

@@ -28,12 +28,24 @@
 <app-ui-empty-state *ngIf="!cargando && !error && !ejercicios.length" icon="bi-search" title="Sin ejercicios para mostrar" message="Prueba con otra categoría, grupo muscular o búsqueda."></app-ui-empty-state>
 <div class="catalogo__lista">
   <article *ngFor="let e of ejercicios; trackBy: trackById" class="catalogo__card">
-    <a class="catalogo__enlace" [routerLink]="gestion ? ['/admin/catalogo', e.id, 'editar'] : ['/ejercicios', e.id]">
-      <app-ui-badge variant="primary">{{ etiquetaCategoria(e.categoria) }}</app-ui-badge>
-      <h2>{{ e.nombre }}</h2>
-      <div class="catalogo__etiquetas"><app-ui-badge *ngFor="let g of e.grupos_musculares">{{ etiquetaMusculo(g) }}</app-ui-badge></div>
-      <p *ngFor="let r of e.recursos" class="catalogo__recurso"><i class="bi bi-geo-alt" aria-hidden="true"></i> {{ r.nombre }} <strong *ngIf="r.numero_maquina">· N.º {{ r.numero_maquina }}</strong></p>
-      <span class="catalogo__ver">{{ gestion ? 'Editar ejercicio' : 'Ver ejercicio' }} <i class="bi bi-arrow-right" aria-hidden="true"></i></span>
+    <a class="catalogo__enlace catalogo__enlace--ejercicio" [routerLink]="gestion ? ['/admin/catalogo', e.id, 'editar'] : ['/ejercicios', e.id]">
+      <div *ngIf="e.grupos_musculares.length" class="catalogo__musculo">
+        <app-muscle-map [muscles]="e.grupos_musculares" [primaryOnly]="true"></app-muscle-map>
+      </div>
+      <div class="catalogo__contenido">
+        <h2>{{ e.nombre }}</h2>
+        <div class="catalogo__etiquetas">
+          <app-ui-badge variant="primary">{{ etiquetaCategoria(e.categoria) }}</app-ui-badge>
+          <app-ui-badge *ngFor="let g of e.grupos_musculares">{{ etiquetaMusculo(g) }}</app-ui-badge>
+        </div>
+        <ng-container *ngFor="let r of e.recursos">
+          <p *ngIf="!repiteNombre(r, e) || r.numero_maquina" class="catalogo__recurso">
+            <i class="bi" [ngClass]="r.tipo === 'maquina' ? 'bi-gear' : r.tipo === 'equipamiento' ? 'bi-box-seam' : 'bi-geo-alt'" aria-hidden="true"></i>
+            {{ repiteNombre(r, e) ? etiquetaRecurso(r.tipo) : r.nombre }} <strong *ngIf="r.numero_maquina">· N.º {{ r.numero_maquina }}</strong>
+          </p>
+        </ng-container>
+        <span *ngIf="gestion" class="catalogo__ver">Editar ejercicio <i class="bi bi-arrow-right" aria-hidden="true"></i></span>
+      </div>
     </a>
     <a *ngIf="gestion" class="catalogo__vista-previa" [routerLink]="['/ejercicios', e.id]">Ver ficha del alumno</a>
   </article>

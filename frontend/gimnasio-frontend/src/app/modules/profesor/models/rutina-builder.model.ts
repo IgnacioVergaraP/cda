@@ -1,9 +1,15 @@
 import { interpretarPeso, UnidadPeso } from '../../../shared/utils/peso';
-import { Ejercicio } from '../../rutinas/models/rutina.model';
+import { Ejercicio, PrescripcionCardio } from '../../rutinas/models/rutina.model';
+import { EjercicioCatalogo } from '../../ejercicios/models/catalogo.model';
 
 /** Ejercicio en el builder: puede ser nuevo o existente. */
 export interface EjercicioBuilder {
   uid: string;
+  usar_catalogo?: boolean;
+  categoria_seleccionada?: string;
+  ejercicio_catalogo_id?: string | null;
+  prescripcion_cardio?: PrescripcionCardio | null;
+  catalogo?: EjercicioCatalogo | null;
   tipo: 'maquina' | 'libre';
   series: number;
   repeticiones: string;
@@ -25,6 +31,8 @@ export interface CrearRutinaPayload {
   grupos_musculares: string[];
   ejercicios: {
     id?: string;
+    ejercicio_catalogo_id?: string | null;
+    prescripcion_cardio?: PrescripcionCardio | null;
     tipo: 'maquina' | 'libre';
     series: number;
     repeticiones: string;
@@ -40,6 +48,8 @@ export interface EditarRutinaPayload {
   grupos_musculares: string[];
   ejercicios: {
     id?: string;
+    ejercicio_catalogo_id?: string | null;
+    prescripcion_cardio?: PrescripcionCardio | null;
     tipo: 'maquina' | 'libre';
     series: number;
     repeticiones: string;
@@ -68,6 +78,11 @@ export function generarUid(): string {
 export function ejercicioExistenteABuilder(e: Ejercicio): EjercicioBuilder {
   return {
     uid: e.id,
+    usar_catalogo: !!e.ejercicio_catalogo_id,
+    ejercicio_catalogo_id: e.ejercicio_catalogo_id ?? null,
+    catalogo: e.catalogo ?? null,
+    categoria_seleccionada: e.catalogo?.categoria ?? '',
+    prescripcion_cardio: e.prescripcion_cardio ?? (e.catalogo?.categoria === 'cardio' ? {} : null),
     tipo: e.tipo,
     series: e.series,
     repeticiones: e.repeticiones,

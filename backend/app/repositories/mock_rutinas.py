@@ -228,6 +228,8 @@ class MockRutinasRepository(RutinasRepository):
                     maquina_id=e.maquina_id,
                     nombre=e.nombre,
                     descripcion=e.descripcion,
+                    ejercicio_catalogo_id=e.ejercicio_catalogo_id,
+                    prescripcion_cardio=e.prescripcion_cardio,
                 )
                 for i, e in enumerate(original.ejercicios)
             ],

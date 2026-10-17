@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Ejercicio } from '../../models/rutina.model';
+import { Ejercicio, resumenCardio } from '../../models/rutina.model';
 
 @Component({
   selector: 'app-ejercicio-item',
@@ -14,6 +14,7 @@ export class EjercicioItemComponent {
   @Input() routineMuscles: string[] = [];
 
   get muscles(): string[] {
+    if (this.ejercicio?.catalogo) return this.ejercicio.catalogo.grupos_musculares;
     return this.esMaquina
       ? (this.ejercicio?.maquina?.grupos_musculares ?? this.routineMuscles)
       : this.routineMuscles;
@@ -23,20 +24,24 @@ export class EjercicioItemComponent {
   @Output() registrarSerie = new EventEmitter<Ejercicio>();
 
   get esMaquina(): boolean {
+    if (this.ejercicio?.catalogo) return this.ejercicio.catalogo.categoria === 'maquina';
     return this.ejercicio?.tipo === 'maquina';
   }
 
   get esLibre(): boolean {
+    if (this.ejercicio?.catalogo) return this.ejercicio.catalogo.categoria === 'libre';
     return this.ejercicio?.tipo === 'libre';
   }
 
   get nombreVisible(): string {
-    return this.esMaquina
+    if (this.ejercicio.catalogo) return this.ejercicio.catalogo.nombre;
+    return this.ejercicio.tipo === 'maquina'
       ? (this.ejercicio.maquina?.nombre ?? 'Máquina no disponible')
       : (this.ejercicio.nombre ?? 'Ejercicio');
   }
 
   get resumenSeries(): string {
+    if (this.ejercicio.catalogo?.categoria === 'cardio') return resumenCardio(this.ejercicio);
     const s = this.ejercicio.series;
     const r = this.ejercicio.repeticiones;
     return `${s} × ${r}`;

@@ -14,6 +14,7 @@ export class HistorialItemComponent {
   @Output() editarSesion = new EventEmitter<HistorialFila>();
 
   get icono(): string {
+    if (this.fila.modalidad === 'cardio') return 'bi-heart-pulse';
     return this.fila.ejercicio_tipo === 'maquina' ? 'bi-gear' : 'bi-lightning';
   }
 

@@ -1,6 +1,6 @@
 <app-ui-page-header
   title="Subir ejercicio"
-  subtitle="Proponé una máquina nueva para el catálogo">
+  subtitle="Propón un ejercicio en máquina, libre o de cardio">
 </app-ui-page-header>
 
 <!-- Botón principal -->
@@ -43,7 +43,7 @@
     *ngIf="!cargando && !errorMensaje && solicitudes.length === 0"
     icon="bi-inbox"
     title="Sin solicitudes"
-    message="Todavía no enviaste ninguna propuesta de máquina.">
+    message="Todavía no enviaste ninguna propuesta de ejercicio.">
   </app-ui-empty-state>
 
   <div *ngIf="!cargando && !errorMensaje && solicitudes.length > 0" class="subir__lista">
@@ -65,21 +65,44 @@
 
     <p class="subir__form-info">
       La propuesta va a quedar pendiente de aprobación por el administrador.
-      Una vez aprobada, va a aparecer en el catálogo de máquinas.
+      Una vez aprobada, va a aparecer en el catálogo de ejercicios.
     </p>
 
+    <div class="subir__form-field">
+      <label class="subir__form-label" for="sb-categoria">Tipo de ejercicio</label>
+      <select id="sb-categoria" class="subir__textarea" [ngModel]="categoria" (ngModelChange)="categoria = $event" [ngModelOptions]="{standalone: true}">
+        <option *ngFor="let c of categorias" [value]="c.value">{{ c.label }}</option>
+      </select>
+    </div>
+    <fieldset class="subir__recursos">
+      <legend>Máquinas, equipamiento o infraestructura</legend>
+      <p class="subir__form-hint">Asocia entre 1 y 30 recursos. El administrador puede agregar recursos al gimnasio.</p>
+      <input class="subir__textarea" type="search" aria-label="Buscar recurso" placeholder="Buscar por nombre o número…" maxlength="80" [(ngModel)]="buscarRecurso" [ngModelOptions]="{standalone: true}" (ngModelChange)="cargarRecursos()" />
+      <div *ngIf="recursosSeleccionados.length" class="subir__chips">
+        <button *ngFor="let r of recursosSeleccionados" class="subir__chip subir__chip--active" type="button" (click)="toggleRecurso(r)" [attr.aria-label]="'Quitar ' + r.nombre">{{ r.nombre }}<span *ngIf="r.numero_maquina"> · N.º {{ r.numero_maquina }}</span> ×</button>
+      </div>
+      <label *ngFor="let r of recursos" class="subir__recurso">
+        <input type="checkbox" [checked]="recursoSeleccionado(r.id)" (change)="toggleRecurso(r)" [disabled]="recursosSeleccionados.length >= 30 && !recursoSeleccionado(r.id)" />
+        {{ r.nombre }}<span *ngIf="r.numero_maquina"> · N.º {{ r.numero_maquina }}</span>
+      </label>
+      <p *ngIf="cargandoRecursos" role="status">Cargando recursos…</p>
+      <p *ngIf="!cargandoRecursos && !errorRecursos && !recursos.length">No hay recursos para esta búsqueda.</p>
+      <p *ngIf="errorRecursos" role="alert">{{ errorRecursos }} <button type="button" (click)="cargarRecursos()">Reintentar</button></p>
+      <button *ngIf="recursosHayMas && !errorRecursos" type="button" [disabled]="cargandoRecursos" (click)="cargarRecursos(true)">Cargar más recursos</button>
+      <p *ngIf="categoria === 'maquina'" class="subir__form-hint">Los ejercicios en máquina requieren al menos un recurso de tipo máquina.</p>
+    </fieldset>
     <app-ui-input
       formControlName="nombre"
-      label="Nombre de la máquina"
+      label="Nombre del ejercicio"
       type="text"
-      placeholder="Ej: Máquina de remo sentado"
+      placeholder="Ej: Remo sentado en polea"
       autocomplete="off"
       [error]="nombreCtrl.touched && nombreCtrl.invalid ? 'Entre 3 y 80 caracteres' : ''">
     </app-ui-input>
 
     <div class="subir__form-field">
       <label class="subir__form-label">Grupos musculares</label>
-      <p class="subir__form-hint">Tocá los que apliquen (mínimo 1, máximo 8)</p>
+      <p class="subir__form-hint">{{ categoria === 'cardio' ? 'Opcionales para cardio (máximo 8)' : 'Selecciona entre 1 y 8 músculos' }}</p>
       <div class="subir__chips">
         <button
           *ngFor="let g of gruposDisponibles"
@@ -99,7 +122,7 @@
         class="subir__textarea"
         formControlName="descripcion"
         rows="4"
-        placeholder="Describí cómo se usa la máquina y qué músculos trabaja...">
+        placeholder="Describe cómo realizar el ejercicio...">
       </textarea>
       <span class="subir__form-hint">Entre 10 y 1000 caracteres</span>
     </div>

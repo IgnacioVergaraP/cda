@@ -16,7 +16,8 @@ html, body {
 
 body {
   min-height: 100dvh;
-  overflow-y: auto;
+  // El documento controla el scroll; el body no debe contener el sticky del sidebar.
+  overflow-y: visible;
   -webkit-overflow-scrolling: touch;
 }
 

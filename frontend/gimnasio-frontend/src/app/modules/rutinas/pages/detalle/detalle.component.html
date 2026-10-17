@@ -73,7 +73,19 @@
 
   <ng-container *ngIf="ejercicioEnSheet">
 
-    <div class="rutina-detalle__sheet-resumen">
+    <div *ngIf="ejercicioEnSheet.catalogo?.categoria === 'cardio'" class="rutina-detalle__sheet-resumen">
+      <div *ngIf="ejercicioEnSheet.prescripcion_cardio?.intensidad" class="rutina-detalle__sheet-resumen-item">
+        <span class="rutina-detalle__sheet-resumen-label">Intensidad</span><span class="rutina-detalle__sheet-resumen-valor">{{ ejercicioEnSheet.prescripcion_cardio?.intensidad }}</span>
+      </div>
+      <div *ngIf="ejercicioEnSheet.prescripcion_cardio?.duracion_minutos != null" class="rutina-detalle__sheet-resumen-item">
+        <span class="rutina-detalle__sheet-resumen-label">Duración</span><span class="rutina-detalle__sheet-resumen-valor">{{ ejercicioEnSheet.prescripcion_cardio?.duracion_minutos }} min</span>
+      </div>
+      <div *ngIf="ejercicioEnSheet.prescripcion_cardio?.distancia_km != null" class="rutina-detalle__sheet-resumen-item">
+        <span class="rutina-detalle__sheet-resumen-label">Distancia</span><span class="rutina-detalle__sheet-resumen-valor">{{ ejercicioEnSheet.prescripcion_cardio?.distancia_km }} km</span>
+      </div>
+      <p *ngIf="!ejercicioEnSheet.prescripcion_cardio && ejercicioEnSheet.repeticiones">{{ ejercicioEnSheet.repeticiones }}</p>
+    </div>
+    <div *ngIf="ejercicioEnSheet.catalogo?.categoria !== 'cardio'" class="rutina-detalle__sheet-resumen">
       <div class="rutina-detalle__sheet-resumen-item">
         <span class="rutina-detalle__sheet-resumen-label">Series</span>
         <span class="rutina-detalle__sheet-resumen-valor">{{ ejercicioEnSheet.series }}</span>
@@ -82,7 +94,7 @@
         <span class="rutina-detalle__sheet-resumen-label">Reps</span>
         <span class="rutina-detalle__sheet-resumen-valor">{{ ejercicioEnSheet.repeticiones }}</span>
       </div>
-      <div class="rutina-detalle__sheet-resumen-item">
+      <div *ngIf="ejercicioEnSheet.catalogo?.categoria !== 'cardio'" class="rutina-detalle__sheet-resumen-item">
         <span class="rutina-detalle__sheet-resumen-label">Peso</span>
         <span class="rutina-detalle__sheet-resumen-valor">
           {{ ejercicioEnSheet.peso_sugerido || '—' }}
@@ -113,10 +125,17 @@
       <app-muscle-map [muscles]="sheetMuscles"></app-muscle-map>
     </section>
 
+    <section *ngIf="ejercicioEnSheet.catalogo as catalogo" class="rutina-detalle__sheet-section">
+      <h3 class="rutina-detalle__sheet-section-title">Recursos asociados</h3>
+      <p *ngFor="let r of catalogo.recursos" class="rutina-detalle__sheet-text">
+        {{ r.nombre }}<strong *ngIf="r.numero_maquina"> · N.º {{ r.numero_maquina }}</strong>
+      </p>
+    </section>
+
     <div class="rutina-detalle__sheet-actions">
 
       <app-ui-button
-        *ngIf="sheetEsMaquina"
+        *ngIf="sheetEsMaquina || ejercicioEnSheet.ejercicio_catalogo_id"
         variant="secondary"
         [block]="true"
         (clicked)="verDetalleMaquina()">
@@ -130,7 +149,7 @@
         *ngIf="!esPublica"
         (clicked)="registrarSeries()">
         <i class="bi bi-check2-square" aria-hidden="true"></i>
-        Registrar series
+        {{ ejercicioEnSheet.catalogo?.categoria === 'cardio' ? 'Registrar cardio' : 'Registrar series' }}
       </app-ui-button>
 
     </div>

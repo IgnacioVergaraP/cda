@@ -1,18 +1,36 @@
 export type RangoAnalytics = '7d' | '30d' | '90d' | '365d';
 
-export interface MaquinaUso {
-  maquina_id: string;
-  maquina_nombre: string;
-  cantidad_series: number;
+export type FiltroTipoRecurso = '' | 'maquina' | 'equipamiento' | 'infraestructura';
+
+export interface RecursoUso {
+  recurso_id: string;
+  nombre: string;
+  tipo: Exclude<FiltroTipoRecurso, ''>;
+  numero_maquina: string | null;
+  cantidad_registros: number;
+  registros_fuerza: number;
+  registros_cardio: number;
+  alumnos_unicos: number;
 }
 
 export interface DashboardUso {
   rango: RangoAnalytics;
   dias: number;
-  total_series: number;
-  total_maquinas_usadas: number;
-  top_usadas: MaquinaUso[];
-  menos_usadas: MaquinaUso[];
+  tipo: FiltroTipoRecurso;
+  desde: string;
+  hasta: string;
+  total_registros: number;
+  registros_con_recursos: number;
+  registros_sin_recursos: number;
+  registros_fuerza: number;
+  registros_cardio: number;
+  alumnos_con_registros: number;
+  total_recursos: number;
+  recursos_usados: number;
+  recursos_sin_uso: number;
+  total_usos: number;
+  top_usadas: RecursoUso[];
+  menos_usadas: RecursoUso[];
 }
 
 export type TipoMantenimiento = 'preventivo' | 'correctivo' | 'limpieza' | 'revision';

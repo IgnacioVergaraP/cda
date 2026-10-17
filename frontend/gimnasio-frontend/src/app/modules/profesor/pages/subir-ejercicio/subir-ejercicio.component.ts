@@ -1,4 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { CatalogoService } from '../../../ejercicios/services/catalogo.service';
+import { CATEGORIAS, CategoriaEjercicio, Recurso } from '../../../ejercicios/models/catalogo.model';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
 
@@ -14,8 +17,35 @@ import { GRUPOS_MUSCULARES, etiquetaMusculo } from '../../../maquinas/models/maq
   templateUrl: './subir-ejercicio.component.html',
   styleUrls: ['./subir-ejercicio.component.scss'],
 })
-export class SubirEjercicioComponent implements OnInit {
+export class SubirEjercicioComponent implements OnInit, OnDestroy {
 
+  readonly categorias = CATEGORIAS;
+  categoria: CategoriaEjercicio = 'maquina';
+  recursos: Recurso[] = [];
+  recursosSeleccionados: Recurso[] = [];
+  buscarRecurso = '';
+  recursosHayMas = false;
+  cargandoRecursos = false;
+  errorRecursos: string | null = null;
+  private cargaRecursos?: Subscription;
+  ngOnDestroy(): void { this.cargaRecursos?.unsubscribe(); }
+  cargarRecursos(mas = false): void {
+    this.cargaRecursos?.unsubscribe();
+    if (!mas) this.recursos = [];
+    this.cargandoRecursos = true;
+    this.errorRecursos = null;
+    this.cargaRecursos = this.catalogoService.recursos({ tipo: '', buscar: this.buscarRecurso.trim(), desde: mas ? this.recursos.length : 0 })
+      .pipe(finalize(() => this.cargandoRecursos = false)).subscribe({
+        next: p => { this.recursos = [...this.recursos, ...p.items]; this.recursosHayMas = p.hay_mas; },
+        error: () => this.errorRecursos = 'No pudimos cargar los recursos.',
+      });
+  }
+  recursoSeleccionado(id: string): boolean { return this.recursosSeleccionados.some(r => r.id === id); }
+  toggleRecurso(recurso: Recurso): void {
+    this.recursosSeleccionados = this.recursoSeleccionado(recurso.id)
+      ? this.recursosSeleccionados.filter(r => r.id !== recurso.id)
+      : this.recursosSeleccionados.length < 30 ? [...this.recursosSeleccionados, recurso] : this.recursosSeleccionados;
+  }
   solicitudes: Solicitud[] = [];
   cargando = false;
   errorMensaje: string | null = null;
@@ -33,6 +63,7 @@ export class SubirEjercicioComponent implements OnInit {
   constructor(
     private profesorService: ProfesorService,
     private fb: FormBuilder,
+    private catalogoService: CatalogoService,
   ) {
     this.form = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(80)]],
@@ -63,6 +94,10 @@ export class SubirEjercicioComponent implements OnInit {
       imagen_url: '',
     });
     this.gruposSeleccionados = [];
+    this.categoria = 'maquina';
+    this.recursosSeleccionados = [];
+    this.buscarRecurso = '';
+    this.cargarRecursos();
     this.errorCreacion = null;
     this.sheetVisible = true;
   }
@@ -91,7 +126,9 @@ export class SubirEjercicioComponent implements OnInit {
   get puedeGuardar(): boolean {
     return !this.guardando
       && this.form.valid
-      && this.gruposSeleccionados.length > 0;
+      && (this.categoria === 'cardio' || this.gruposSeleccionados.length > 0)
+      && this.recursosSeleccionados.length > 0
+      && (this.categoria !== 'maquina' || this.recursosSeleccionados.some(r => r.tipo === 'maquina'));
   }
 
   guardar(): void {
@@ -105,6 +142,8 @@ export class SubirEjercicioComponent implements OnInit {
 
     const raw = this.form.value;
     const payload: CrearSolicitudPayload = {
+      categoria: this.categoria,
+      recurso_ids: this.recursosSeleccionados.map(r => r.id),
       nombre: raw.nombre.trim(),
       grupos_musculares: this.gruposSeleccionados,
       descripcion: raw.descripcion.trim(),

@@ -9,6 +9,10 @@ from app.domain.models import SolicitudEjercicio
 class SolicitudesRepository(ABC):
 
     @abstractmethod
+    def aprobar_catalogo(self, solicitud, admin) -> Optional[SolicitudEjercicio]:
+        ...
+
+    @abstractmethod
     def crear(self, solicitud: SolicitudEjercicio) -> SolicitudEjercicio:
         ...
 

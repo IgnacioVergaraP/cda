@@ -125,7 +125,7 @@ def obtener_progreso_alumno(alumno_id: str, gimnasio_id: str) -> dict:
     evolucion = None
     if historial:
         first = historial[0]
-        key = first["maquina_id"] if first["ejercicio_tipo"] == "maquina" else first["nombre_libre"]
+        key = first.get("ejercicio_key") or (first["maquina_id"] if first["ejercicio_tipo"] == "maquina" else first["nombre_libre"])
         if key:
             evolucion = progreso_services.obtener_evolucion(alumno_id, key)
 
@@ -194,6 +194,7 @@ def crear_rutina(profesor, payload: dict) -> dict:
     if not _es_alumno(alumno):
         raise AuthError(400, "InvalidAlumno", f"No existe un alumno con id '{payload['alumno_id']}'.")
 
+    rutinas_services._validar_maquinas(profesor, payload)
     ejercicios = [
         Ejercicio(
             id=e["id"],
@@ -204,6 +205,8 @@ def crear_rutina(profesor, payload: dict) -> dict:
             maquina_id=e.get("maquina_id"),
             nombre=e.get("nombre"),
             descripcion=e.get("descripcion"),
+            ejercicio_catalogo_id=e.get("ejercicio_catalogo_id"),
+            prescripcion_cardio=e.get("prescripcion_cardio"),
         )
         for e in payload["ejercicios"]
     ]
@@ -239,10 +242,11 @@ def crear_rutina(profesor, payload: dict) -> dict:
             "fecha_revision": datetime.now(timezone.utc).isoformat(),
         })
 
-    return creada.to_dict_resuelto(_maquinas_dict_para(creada))
+    return rutinas_services._resolver(creada)
 
 
 def editar_rutina(profesor, rutina_id: str, payload: dict) -> dict:
+    rutinas_services._validar_maquinas(profesor, payload)
     ejercicios = [
         Ejercicio(
             id=e["id"],
@@ -253,6 +257,8 @@ def editar_rutina(profesor, rutina_id: str, payload: dict) -> dict:
             maquina_id=e.get("maquina_id"),
             nombre=e.get("nombre"),
             descripcion=e.get("descripcion"),
+            ejercicio_catalogo_id=e.get("ejercicio_catalogo_id"),
+            prescripcion_cardio=e.get("prescripcion_cardio"),
         )
         for e in payload["ejercicios"]
     ]
@@ -268,7 +274,7 @@ def editar_rutina(profesor, rutina_id: str, payload: dict) -> dict:
     )
     if not actualizada:
         raise AuthError(404, "NotFound", f"No existe una rutina con id '{rutina_id}' que te pertenezca.")
-    return actualizada.to_dict_resuelto(_maquinas_dict_para(actualizada))
+    return rutinas_services._resolver(actualizada)
 
 
 def archivar_rutina(profesor, rutina_id: str) -> dict:
@@ -302,7 +308,7 @@ def duplicar_rutina(profesor, rutina_id: str, nuevo_alumno_id: str) -> dict:
     )
     if not nueva:
         raise AuthError(500, "UnexpectedError", "No se pudo duplicar la rutina.")
-    return nueva.to_dict_resuelto(_maquinas_dict_para(nueva))
+    return rutinas_services._resolver(nueva)
 
 
 def _maquinas_dict_para(rutina: Rutina) -> dict:
@@ -319,7 +325,29 @@ def _maquinas_dict_para(rutina: Rutina) -> dict:
 # Solicitudes de ejercicio (profesor → admin)
 # ============================================================
 
+def _recursos_solicitud(gimnasio_id, categoria, ids):
+    from app.blueprints.ejercicios import services as catalogo
+    recursos = catalogo._repo.recursos_por_ids(ids, gimnasio_id)
+    if len(recursos) != len(ids) or not recursos:
+        raise AuthError(400, "InvalidRecurso", "Selecciona recursos existentes de tu gimnasio.")
+    if categoria == "maquina" and not any(r["tipo"] == "maquina" for r in recursos):
+        raise AuthError(400, "InvalidRecurso", "Asocia al menos una máquina a este ejercicio.")
+    return recursos
+
+
+def _solicitudes_resueltas(solicitudes):
+    from app.blueprints.ejercicios import services as catalogo
+    recursos_por_gym = {}
+    for solicitud in solicitudes:
+        recursos_por_gym.setdefault(solicitud.gimnasio_id, set()).update(solicitud.recurso_ids)
+    recursos = {r["id"]: r for gym, ids in recursos_por_gym.items()
+                for r in catalogo._repo.recursos_por_ids(list(ids), gym)}
+    return [{**s.to_dict(), "recursos": [recursos[id] for id in s.recurso_ids if id in recursos]} for s in solicitudes]
+
+
 def crear_solicitud(profesor, payload: dict) -> dict:
+    if payload.get("categoria"):
+        _recursos_solicitud(profesor.gimnasio_id, payload["categoria"], payload["recurso_ids"])
     solicitud = SolicitudEjercicio(
         id="",
         tipo_solicitud="crear",
@@ -332,15 +360,17 @@ def crear_solicitud(profesor, payload: dict) -> dict:
         descripcion=payload["descripcion"],
         video_url=payload["video_url"],
         imagen_url=payload["imagen_url"],
+        categoria=payload.get("categoria"),
+        recurso_ids=payload.get("recurso_ids", []),
     )
     creada = _solicitudes_repo.crear(solicitud)
     logger.info("[NOTIFICACIÓN ADMIN] Nueva solicitud %s de '%s' creada por %s",
                 creada.id, creada.nombre, profesor.nombre)
-    return creada.to_dict()
+    return _solicitudes_resueltas([creada])[0]
 
 
 def listar_mis_solicitudes(profesor_id: str) -> List[dict]:
-    return [s.to_dict() for s in _solicitudes_repo.listar_por_solicitante(profesor_id)]
+    return _solicitudes_resueltas(_solicitudes_repo.listar_por_solicitante(profesor_id))
 
 
 def cancelar_solicitud(profesor, solicitud_id: str) -> dict:
@@ -364,7 +394,7 @@ def cancelar_solicitud(profesor, solicitud_id: str) -> dict:
 
 
 def listar_pendientes(gimnasio_id: str) -> List[dict]:
-    return [s.to_dict() for s in _solicitudes_repo.listar_pendientes(gimnasio_id)]
+    return _solicitudes_resueltas(_solicitudes_repo.listar_pendientes(gimnasio_id))
 
 
 def contar_pendientes(gimnasio_id: str) -> dict:
@@ -377,6 +407,18 @@ def aprobar_solicitud(admin, solicitud_id: str) -> dict:
         raise AuthError(404, "NotFound", f"No existe una solicitud con id '{solicitud_id}'.")
     if solicitud.estado != "pendiente":
         raise AuthError(400, "InvalidState", "Solo se pueden aprobar solicitudes pendientes.")
+
+    if solicitud.tipo_solicitud == "crear" and solicitud.categoria:
+        _recursos_solicitud(admin.gimnasio_id, solicitud.categoria, solicitud.recurso_ids)
+        try:
+            actualizada = _solicitudes_repo.aprobar_catalogo(solicitud, admin)
+        except Exception as exc:
+            if getattr(exc, "code", None) in ("22023", "P0002", "40001"):
+                raise AuthError(400, "InvalidSolicitud", "La solicitud cambió o sus recursos ya no son válidos. Actualiza la lista.") from exc
+            raise
+        if not actualizada:
+            raise AuthError(500, "UnexpectedError", "No se pudo aprobar la solicitud.")
+        return _solicitudes_resueltas([actualizada])[0]
 
     if solicitud.tipo_solicitud == "crear":
         maquina = _maquinas_repo.crear(

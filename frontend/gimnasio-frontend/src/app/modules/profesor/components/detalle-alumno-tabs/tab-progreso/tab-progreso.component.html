@@ -39,10 +39,11 @@
           <i class="bi bi-graph-up-arrow tpg__evolucion-icon" aria-hidden="true"></i>
         </div>
 
-        <app-grafico-evolucion
+        <app-grafico-evolucion *ngIf="evolucion.modalidad !== 'cardio'"
           [puntos]="evolucion.puntos"
           [prHistorico]="evolucion.pr_historico">
         </app-grafico-evolucion>
+        <app-evolucion-cardio *ngIf="evolucion.modalidad === 'cardio'" [puntos]="evolucion.puntos"></app-evolucion-cardio>
       </app-ui-card>
     </section>
 

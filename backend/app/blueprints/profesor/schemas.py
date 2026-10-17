@@ -1,5 +1,7 @@
 """Validación del módulo profesor."""
 from app.errors import AuthError
+from uuid import UUID
+from math import isfinite
 
 
 TIPOS_REPORTE = ("rota", "desgastada", "falta_accesorio", "limpieza", "otro")
@@ -10,6 +12,14 @@ OBJETIVOS_RUTINA = ("hipertrofia", "fuerza", "resistencia", "perder_grasa", "man
 def validar_crear_solicitud_payload(data: dict) -> dict:
     if not isinstance(data, dict):
         raise AuthError(400, "InvalidPayload", "Se esperaba un objeto JSON.")
+    if "categoria" in data or "recurso_ids" in data:
+        from app.blueprints.ejercicios.schemas import ejercicio
+        datos, ids = ejercicio(data)
+        if not 3 <= len(datos["nombre"]) <= 80 or not 10 <= len(datos["descripcion"]) <= 1000:
+            raise AuthError(400, "InvalidPayload", "Revisa el nombre (3–80 caracteres) y la descripción (10–1000).")
+        if datos["categoria"] != "cardio" and not datos["grupos_musculares"]:
+            raise AuthError(400, "InvalidGrupos", "Selecciona al menos un grupo muscular.")
+        return {**datos, "recurso_ids": ids}
     nombre = data.get("nombre")
     if not isinstance(nombre, str) or not nombre.strip():
         raise AuthError(400, "InvalidPayload", "'nombre' es obligatorio.")
@@ -193,22 +203,42 @@ def _validar_ejercicio(e: dict, index: int) -> dict:
         raise AuthError(400, "InvalidEjercicio", f"El ejercicio #{index+1} no es un objeto.")
 
     tipo = e.get("tipo")
-    if tipo not in ("maquina", "libre"):
+    catalogo_id = e.get("ejercicio_catalogo_id")
+    if catalogo_id is not None:
+        try:
+            catalogo_id = str(UUID(catalogo_id))
+        except (ValueError, TypeError, AttributeError):
+            raise AuthError(400, "InvalidEjercicio", "El identificador del ejercicio del catálogo no es válido.")
+    if tipo not in ("maquina", "libre") and not catalogo_id:
         raise AuthError(400, "InvalidEjercicio", f"El ejercicio #{index+1} tiene tipo inválido.")
 
-    series = e.get("series")
+    cardio = e.get("prescripcion_cardio")
+    if cardio is not None:
+        if not catalogo_id or not isinstance(cardio, dict):
+            raise AuthError(400, "InvalidEjercicio", "La prescripción de cardio requiere un ejercicio del catálogo.")
+        intensidad = cardio.get("intensidad")
+        if intensidad is not None and (not isinstance(intensidad, str) or len(intensidad.strip()) > 100):
+            raise AuthError(400, "InvalidEjercicio", "La intensidad admite hasta 100 caracteres.")
+        cardio = {"intensidad": (intensidad.strip() or None) if intensidad is not None else None}
+        for campo, maximo in (("duracion_minutos", 10080), ("distancia_km", 1000)):
+            valor = e["prescripcion_cardio"].get(campo)
+            if valor is not None and (type(valor) not in (int, float) or not isfinite(valor) or not 0 < valor <= maximo):
+                raise AuthError(400, "InvalidEjercicio", f"'{campo}' debe ser positivo y no superar {maximo}.")
+            cardio[campo] = valor
+
+    series = 1 if cardio is not None else e.get("series")
     if not isinstance(series, int) or series < 1 or series > 20:
         raise AuthError(400, "InvalidEjercicio", f"El ejercicio #{index+1} debe tener entre 1 y 20 series.")
 
-    reps = e.get("repeticiones")
-    if not isinstance(reps, str) or not reps.strip():
+    reps = "" if cardio is not None else e.get("repeticiones")
+    if not isinstance(reps, str) or (cardio is None and not reps.strip()):
         raise AuthError(400, "InvalidEjercicio", f"El ejercicio #{index+1} debe tener repeticiones.")
     reps = reps.strip()
     if len(reps) > 30:
         raise AuthError(400, "InvalidEjercicio", f"Las repeticiones del ejercicio #{index+1} son demasiado largas.")
 
-    peso = e.get("peso_sugerido")
-    if not isinstance(peso, str) or not peso.strip():
+    peso = "" if cardio is not None else e.get("peso_sugerido")
+    if not isinstance(peso, str) or (cardio is None and not peso.strip()):
         raise AuthError(400, "InvalidEjercicio", f"El peso sugerido del ejercicio #{index+1} es obligatorio.")
     peso = peso.strip()
     if len(peso) > 40:
@@ -216,11 +246,17 @@ def _validar_ejercicio(e: dict, index: int) -> dict:
 
     out = {
         "id": e.get("id") or f"ej-{index+1}",
-        "tipo": tipo,
+        "tipo": tipo if tipo in ("maquina", "libre") else "libre",
         "series": series,
         "repeticiones": reps,
         "peso_sugerido": peso,
+        "prescripcion_cardio": cardio,
     }
+
+    if catalogo_id:
+        # La identidad, el nombre y el tipo de compatibilidad se resuelven en el servidor.
+        out["ejercicio_catalogo_id"] = catalogo_id
+        return out
 
     if tipo == "maquina":
         maquina_id = e.get("maquina_id")

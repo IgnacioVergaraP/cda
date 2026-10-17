@@ -52,7 +52,7 @@ class MockAuth:
         mock_usuarios = MockUsuariosRepository()
         mock_maquinas = MockMaquinasRepository()
         mock_rutinas = MockRutinasRepository()
-        mock_progreso = MockProgresoRepository()
+        mock_progreso = MockProgresoRepository(mock_usuarios)
         mock_solicitudes = MockSolicitudesRepository()
         mock_reportes = MockReportesRepository()
         mock_solicitudes_rutina = MockSolicitudesRutinaRepository()

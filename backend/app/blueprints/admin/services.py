@@ -1,7 +1,7 @@
 """Lógica de negocio del módulo admin."""
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
-from collections import Counter
+from app.blueprints.ejercicios import services as catalogo_services
 
 from app.errors import AuthError
 from app.domain.models import Horario, Mantenimiento
@@ -131,75 +131,67 @@ def _dias_de_rango(rango: str) -> int:
     return _RANGOS_VALIDOS[rango]
 
 
-def obtener_dashboard_uso(rango: str, gimnasio_id: str) -> dict:
-    """
-    Analítica de uso de máquinas basada en los registros de series de los alumnos.
-    """
+def obtener_dashboard_uso(rango: str, gimnasio_id: str, tipo: str = "") -> dict:
+    """Cada registro cuenta un uso por recurso seleccionado, nunca por asociación del catálogo."""
     dias = _dias_de_rango(rango)
-    corte = datetime.now(timezone.utc) - timedelta(days=dias)
-
-    repo = _progreso_repo()
-    alumnos = _usuarios_repo.listar_por_gimnasio(gimnasio_id)
-
-    todos = []
-    for u in alumnos:
-        if u.rol != "alumno":
-            continue
-        todos.extend(repo.listar_por_alumno(u.id))
-
-    # Filtro por fecha + solo tipo máquina
-    contador = Counter()
-    total_series = 0
-    for r in todos:
-        if r.ejercicio_tipo != "maquina" or not r.maquina_id:
+    if tipo not in ("", "maquina", "equipamiento", "infraestructura"):
+        raise AuthError(400, "InvalidTipo", "Selecciona un tipo de recurso válido.")
+    hasta = datetime.now(timezone.utc)
+    desde = hasta - timedelta(days=dias)
+    recursos = {r["id"]: r for r in catalogo_services._repo.iterar_recursos_uso(gimnasio_id)
+                if r["gimnasio_id"] == gimnasio_id}
+    estadisticas = {
+        id: {"recurso_id": id, "nombre": r["nombre"], "tipo": r["tipo"],
+             "numero_maquina": r.get("numero_maquina"), "cantidad_registros": 0,
+             "registros_fuerza": 0, "registros_cardio": 0, "alumnos_unicos": 0}
+        for id, r in recursos.items() if not tipo or r["tipo"] == tipo
+    }
+    alumnos_por_recurso = {id: set() for id in estadisticas}
+    alumnos = set()
+    total = con_recursos = fuerza = cardio = 0
+    for registro in _progreso_repo().iterar_uso_recursos(gimnasio_id, desde.isoformat(), hasta.isoformat()):
+        if registro.get("gimnasio_id") != gimnasio_id:
             continue
         try:
-            f = datetime.fromisoformat(r.fecha)
-            # Normalizar a UTC para comparar manzanas con manzanas
-            if f.tzinfo is None:
-                f = f.replace(tzinfo=timezone.utc)
-            if f < corte:
+            fecha = datetime.fromisoformat(registro["fecha"])
+            if fecha.tzinfo is None:
+                fecha = fecha.replace(tzinfo=timezone.utc)
+            if not desde <= fecha < hasta:
                 continue
-        except (ValueError, TypeError):
+        except (KeyError, TypeError, ValueError):
             continue
-        contador[r.maquina_id] += 1
-        total_series += 1
-
-    # Enriquecer con el nombre de la máquina
-    maquinas_todas = _maquinas_repo.listar(gimnasio_id)
-    nombres = {m.id: m.nombre for m in maquinas_todas}
-
-    ranking = []
-    for maquina_id, cantidad in contador.items():
-        ranking.append({
-            "maquina_id": maquina_id,
-            "maquina_nombre": nombres.get(maquina_id, maquina_id),
-            "cantidad_series": cantidad,
-        })
-    ranking.sort(key=lambda x: x["cantidad_series"], reverse=True)
-
-    # Máquinas con 0 uso (las que están en el catálogo pero no aparecen en ranking)
-    sin_uso = []
-    for m in maquinas_todas:
-        if m.id not in contador:
-            sin_uso.append({
-                "maquina_id": m.id,
-                "maquina_nombre": m.nombre,
-                "cantidad_series": 0,
-            })
-
-    # "Menos usadas": las de menor cantidad del ranking + las que tienen 0 uso
-    menos = ranking[-5:][::-1] if len(ranking) >= 5 else ranking[::-1]
-    faltantes = max(0, 5 - len(menos))
-    menos = menos + sin_uso[:faltantes]
-
+        total += 1
+        alumnos.add(registro["alumno_id"])
+        es_cardio = registro.get("modalidad") == "cardio"
+        cardio += int(es_cardio)
+        fuerza += int(not es_cardio)
+        ids = {v["recurso_id"] for v in registro.get("vinculos", [])
+               if v.get("gimnasio_id") == gimnasio_id and v.get("recurso_id") in recursos}
+        con_recursos += int(bool(ids))
+        for id in ids & estadisticas.keys():
+            fila = estadisticas[id]
+            fila["cantidad_registros"] += 1
+            fila["registros_cardio" if es_cardio else "registros_fuerza"] += 1
+            alumnos_por_recurso[id].add(registro["alumno_id"])
+    for id, fila in estadisticas.items():
+        fila["alumnos_unicos"] = len(alumnos_por_recurso[id])
+    filas = list(estadisticas.values())
+    desempate = lambda r: (r["nombre"].casefold(), (r["numero_maquina"] or "").casefold(), r["recurso_id"])
+    top = sorted((r for r in filas if r["cantidad_registros"]),
+                 key=lambda r: (-r["cantidad_registros"], *desempate(r)))[:5]
+    menos = sorted(filas, key=lambda r: (r["cantidad_registros"], *desempate(r)))[:5]
+    usados = sum(r["cantidad_registros"] > 0 for r in filas)
     return {
-        "rango": rango,
-        "dias": dias,
-        "total_series": total_series,
-        "total_maquinas_usadas": len(contador),
-        "top_usadas": ranking[:5],
-        "menos_usadas": menos,
+        "rango": rango, "dias": dias, "tipo": tipo,
+        "desde": desde.isoformat(), "hasta": hasta.isoformat(),
+        "total_registros": total, "registros_con_recursos": con_recursos,
+        "registros_sin_recursos": total - con_recursos,
+        "registros_fuerza": fuerza, "registros_cardio": cardio,
+        "alumnos_con_registros": len(alumnos),
+        "total_recursos": len(filas), "recursos_usados": usados,
+        "recursos_sin_uso": len(filas) - usados,
+        "total_usos": sum(r["cantidad_registros"] for r in filas),
+        "top_usadas": top, "menos_usadas": menos,
     }
 
 

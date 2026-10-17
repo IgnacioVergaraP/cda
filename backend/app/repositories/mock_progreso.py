@@ -3,7 +3,7 @@ Implementación mock del repositorio de progreso.
 """
 from copy import deepcopy
 from typing import List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from app.domain.models import RegistroSerie
 from app.repositories.progreso_repository import ProgresoRepository
 
@@ -91,8 +91,30 @@ _agregar("u-alu-004", 6, "maquina", "corporal", "35 segundos", 2, maquina="mq-01
 
 class MockProgresoRepository(ProgresoRepository):
 
-    def __init__(self):
+    def __init__(self, usuarios_repo=None):
         self._registros: List[RegistroSerie] = deepcopy(_REGISTROS_MOCK)
+        from app.repositories.mock_usuarios import MockUsuariosRepository
+        self._usuarios = usuarios_repo or MockUsuariosRepository()
+
+    def iterar_uso_recursos(self, gimnasio_id, desde, hasta):
+        inicio, fin = datetime.fromisoformat(desde), datetime.fromisoformat(hasta)
+        for r in self._registros:
+            if r.gimnasio_id != gimnasio_id:
+                continue
+            alumno = self._usuarios.find_by_id(r.alumno_id)
+            if not alumno or alumno.rol != "alumno":
+                continue
+            try:
+                fecha = datetime.fromisoformat(r.fecha)
+                if fecha.tzinfo is None:
+                    fecha = fecha.replace(tzinfo=timezone.utc)
+            except (TypeError, ValueError):
+                continue
+            if inicio <= fecha < fin:
+                yield {"id": r.id, "alumno_id": r.alumno_id, "gimnasio_id": r.gimnasio_id,
+                       "fecha": r.fecha, "modalidad": r.modalidad,
+                       "vinculos": [{"recurso_id": recurso["id"], "gimnasio_id": recurso.get("gimnasio_id", r.gimnasio_id)}
+                                    for recurso in r.recursos]}
 
     def _calcular_next_num(self) -> int:
         max_n = 0
@@ -118,52 +140,19 @@ class MockProgresoRepository(ProgresoRepository):
 
     def listar_por_ejercicio(self, alumno_id: str, ejercicio_key: str) -> List[RegistroSerie]:
         key = ejercicio_key.strip().lower()
-        result = []
-        for r in self._registros:
-            if r.alumno_id != alumno_id:
-                continue
-            if r.ejercicio_tipo == "maquina" and r.maquina_id and r.maquina_id.lower() == key:
-                result.append(r)
-            elif r.ejercicio_tipo == "libre" and r.nombre_libre and r.nombre_libre.lower() == key:
-                result.append(r)
-        return result
+        return [r for r in self._registros if r.alumno_id == alumno_id and (
+            (key.startswith("catalogo:") and r.ejercicio_catalogo_id == key[9:])
+            or (not key.startswith("catalogo:") and (
+                (r.ejercicio_tipo == "maquina" and (r.maquina_id or "").lower() == key)
+                or (r.ejercicio_tipo == "libre" and (r.nombre_libre or "").lower() == key)))
+        )]
 
-    def listar_sesion(
-        self, alumno_id: str, ejercicio_key: str, fecha_dia: str
-    ) -> List[RegistroSerie]:
-        key = ejercicio_key.strip().lower()
-        result = []
-        for r in self._registros:
-            if r.alumno_id != alumno_id:
-                continue
-            if not r.fecha.startswith(fecha_dia):
-                continue
-            match = False
-            if r.ejercicio_tipo == "maquina" and r.maquina_id and r.maquina_id.lower() == key:
-                match = True
-            elif r.ejercicio_tipo == "libre" and r.nombre_libre and r.nombre_libre.lower() == key:
-                match = True
-            if match:
-                result.append(r)
-        result.sort(key=lambda r: r.numero_serie)
-        return result
+    def listar_sesion(self, alumno_id: str, ejercicio_key: str, fecha_dia: str) -> List[RegistroSerie]:
+        return sorted([r for r in self.listar_por_ejercicio(alumno_id, ejercicio_key)
+                       if r.fecha.startswith(fecha_dia)], key=lambda r: r.numero_serie)
 
     def siguiente_numero_serie(self, alumno_id: str, ejercicio_key: str, fecha_iso_dia: str) -> int:
-        key = ejercicio_key.strip().lower()
-        max_n = 0
-        for r in self._registros:
-            if r.alumno_id != alumno_id:
-                continue
-            if not r.fecha.startswith(fecha_iso_dia):
-                continue
-            match = False
-            if r.ejercicio_tipo == "maquina" and r.maquina_id and r.maquina_id.lower() == key:
-                match = True
-            elif r.ejercicio_tipo == "libre" and r.nombre_libre and r.nombre_libre.lower() == key:
-                match = True
-            if match and r.numero_serie > max_n:
-                max_n = r.numero_serie
-        return max_n + 1
+        return max((r.numero_serie for r in self.listar_sesion(alumno_id, ejercicio_key, fecha_iso_dia)), default=0) + 1
 
     def find_by_id(self, registro_id: str) -> Optional[RegistroSerie]:
         for r in self._registros:
@@ -177,10 +166,13 @@ class MockProgresoRepository(ProgresoRepository):
         alumno_id: str,
         peso: str,
         repeticiones: str,
+        **metricas,
     ) -> Optional[RegistroSerie]:
         registro = self.find_by_id(registro_id)
         if not registro or registro.alumno_id != alumno_id:
             return None
         registro.peso = peso
         registro.repeticiones = repeticiones
+        for k, v in metricas.items():
+            setattr(registro, k, v)
         return registro

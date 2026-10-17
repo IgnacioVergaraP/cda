@@ -1,3 +1,5 @@
+import { CategoriaEjercicio, Recurso } from '../../ejercicios/models/catalogo.model';
+
 export type EstadoSolicitud = 'pendiente' | 'aprobada' | 'rechazada' | 'cancelada';
 
 export type TipoSolicitud = 'crear';
@@ -8,6 +10,10 @@ export interface Solicitud {
   estado: EstadoSolicitud;
   solicitante_id: string;
   solicitante_nombre: string;
+  categoria?: CategoriaEjercicio | null;
+  recurso_ids?: string[];
+  recursos?: Recurso[];
+  ejercicio_catalogo_id_creado?: string | null;
   nombre: string;
   grupos_musculares: string[];
   descripcion: string;
@@ -23,6 +29,8 @@ export interface Solicitud {
 }
 
 export interface CrearSolicitudPayload {
+  categoria?: CategoriaEjercicio;
+  recurso_ids?: string[];
   nombre: string;
   grupos_musculares: string[];
   descripcion: string;

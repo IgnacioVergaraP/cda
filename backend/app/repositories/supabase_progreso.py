@@ -2,6 +2,7 @@
 Implementación del repositorio de progreso contra Supabase.
 """
 from datetime import datetime
+from uuid import UUID
 from typing import List, Optional
 from app.domain.models import RegistroSerie
 from app.repositories.progreso_repository import ProgresoRepository
@@ -10,7 +11,9 @@ from app.extensions import get_supabase
 
 _COLUMNS = (
     "id,alumno_id,fecha,ejercicio_tipo,maquina_id,nombre_libre,rutina_id,"
-    "numero_serie,peso,repeticiones,gimnasio_id"
+    "numero_serie,peso,repeticiones,gimnasio_id,ejercicio_catalogo_id,modalidad,"
+    "peso_valor,peso_unidad,peso_kg,repeticiones_valor,duracion_segundos,distancia_metros,"
+    "vinculos:progreso_recursos(recurso:recursos_gimnasio(id,nombre,tipo,numero_maquina,gimnasio_id))"
 )
 
 
@@ -28,6 +31,12 @@ def _row_a_registro(row: dict) -> RegistroSerie:
         nombre_libre=row.get("nombre_libre"),
         rutina_id=row.get("rutina_id"),
         gimnasio_id=row["gimnasio_id"],
+        ejercicio_catalogo_id=row.get("ejercicio_catalogo_id"),
+        modalidad=row.get("modalidad", "fuerza"),
+        peso_valor=row.get("peso_valor"), peso_unidad=row.get("peso_unidad"), peso_kg=row.get("peso_kg"),
+        repeticiones_valor=row.get("repeticiones_valor"),
+        duracion_segundos=row.get("duracion_segundos"), distancia_metros=row.get("distancia_metros"),
+        recursos=[v["recurso"] for v in row.get("vinculos", []) if v.get("recurso")],
     )
 
 
@@ -37,6 +46,24 @@ class SupabaseProgresoRepository(ProgresoRepository):
         self._sb = get_supabase()
 
     # -------- Lectura --------
+
+    def iterar_uso_recursos(self, gimnasio_id, desde, hasta):
+        """Lectura por gimnasio y período, sin una consulta por alumno ni límite de 1000 registros."""
+        posicion = 0
+        columnas = (
+            "id,alumno_id,gimnasio_id,fecha,modalidad,"
+            "alumno:profiles!progreso_registros_alumno_id_fkey!inner(rol),"
+            "vinculos:progreso_recursos(recurso_id,gimnasio_id)"
+        )
+        while True:
+            rows = (self._sb.table("progreso_registros").select(columnas)
+                    .eq("gimnasio_id", gimnasio_id).eq("alumno.rol", "alumno")
+                    .gte("fecha", desde).lt("fecha", hasta).order("fecha").order("id")
+                    .range(posicion, posicion + 999).execute().data or [])
+            yield from rows
+            if len(rows) < 1000:
+                break
+            posicion += len(rows)
 
     def listar_por_alumno(self, alumno_id: str) -> List[RegistroSerie]:
         resp = (
@@ -49,39 +76,9 @@ class SupabaseProgresoRepository(ProgresoRepository):
         return [_row_a_registro(row) for row in (resp.data or [])]
 
     def listar_por_ejercicio(self, alumno_id: str, ejercicio_key: str) -> List[RegistroSerie]:
-        key = ejercicio_key.strip().lower()
-        # La clave puede ser un maquina_id (uuid) o un nombre_libre (texto).
-        # Hacemos dos queries y combinamos — pero si la key parece UUID, solo la primera.
-        resultados: List[RegistroSerie] = []
-
-        # Intento como maquina_id (solo si parece UUID válido)
-        if self._parece_uuid(key):
-            resp = (
-                self._sb.table("progreso_registros")
-                .select(_COLUMNS)
-                .eq("alumno_id", alumno_id)
-                .eq("ejercicio_tipo", "maquina")
-                .eq("maquina_id", key)
-                .order("fecha")
-                .execute()
-            )
-            resultados.extend(_row_a_registro(row) for row in (resp.data or []))
-            return resultados
-
-        # Si no es UUID, buscar por nombre_libre exacto (case-insensitive)
-        # PostgREST no soporta ilike sin comodines directamente en eq;
-        # usamos ilike sin % para simular case-insensitive exact.
-        resp = (
-            self._sb.table("progreso_registros")
-            .select(_COLUMNS)
-            .eq("alumno_id", alumno_id)
-            .eq("ejercicio_tipo", "libre")
-            .ilike("nombre_libre", key)
-            .order("fecha")
-            .execute()
-        )
-        resultados.extend(_row_a_registro(row) for row in (resp.data or []))
-        return resultados
+        query = self._sb.table("progreso_registros").select(_COLUMNS).eq("alumno_id", alumno_id)
+        resp = self._filtrar_ejercicio(query, ejercicio_key).order("fecha").execute()
+        return [_row_a_registro(row) for row in (resp.data or [])]
 
     def listar_sesion(self, alumno_id: str, ejercicio_key: str, fecha_dia: str) -> List[RegistroSerie]:
         key = ejercicio_key.strip().lower()
@@ -98,10 +95,7 @@ class SupabaseProgresoRepository(ProgresoRepository):
             .lte("fecha", fin_dia)
         )
 
-        if self._parece_uuid(key):
-            query = query.eq("ejercicio_tipo", "maquina").eq("maquina_id", key)
-        else:
-            query = query.eq("ejercicio_tipo", "libre").ilike("nombre_libre", key)
+        query = self._filtrar_ejercicio(query, key)
 
         resp = query.order("numero_serie").execute()
         return [_row_a_registro(row) for row in (resp.data or [])]
@@ -127,6 +121,17 @@ class SupabaseProgresoRepository(ProgresoRepository):
     # -------- Escritura --------
 
     def crear(self, registro: RegistroSerie) -> RegistroSerie:
+        if registro.ejercicio_catalogo_id:
+            payload = registro.to_dict()
+            payload.pop("id")
+            payload.pop("recursos")
+            resp = self._sb.rpc("registrar_entrenamiento_catalogo", {
+                "p_registro": payload, "p_recurso_ids": [r["id"] for r in registro.recursos],
+            }).execute()
+            creado = self.find_by_id(resp.data) if resp.data else None
+            if not creado:
+                raise RuntimeError("No se pudo crear el registro de entrenamiento.")
+            return creado
         payload = {
             "alumno_id": registro.alumno_id,
             "fecha": registro.fecha or datetime.utcnow().isoformat() + "Z",
@@ -138,6 +143,8 @@ class SupabaseProgresoRepository(ProgresoRepository):
             "numero_serie": registro.numero_serie,
             "peso": registro.peso,
             "repeticiones": registro.repeticiones,
+            **{k: getattr(registro, k) for k in ("modalidad", "peso_valor", "peso_unidad", "peso_kg",
+                                               "repeticiones_valor", "duracion_segundos", "distancia_metros")},
         }
         resp = self._sb.table("progreso_registros").insert(payload).execute()
         if not resp.data:
@@ -150,6 +157,7 @@ class SupabaseProgresoRepository(ProgresoRepository):
         alumno_id: str,
         peso: str,
         repeticiones: str,
+        **metricas,
     ) -> Optional[RegistroSerie]:
         # Verificamos pertenencia
         resp = (
@@ -164,7 +172,7 @@ class SupabaseProgresoRepository(ProgresoRepository):
 
         update_resp = (
             self._sb.table("progreso_registros")
-            .update({"peso": peso, "repeticiones": repeticiones})
+            .update({"peso": peso, "repeticiones": repeticiones, **metricas})
             .eq("id", registro_id)
             .execute()
         )
@@ -174,12 +182,20 @@ class SupabaseProgresoRepository(ProgresoRepository):
 
     # -------- Helpers --------
 
+    @classmethod
+    def _filtrar_ejercicio(cls, query, ejercicio_key):
+        key = ejercicio_key.strip().lower()
+        if key.startswith("catalogo:"):
+            return query.eq("ejercicio_catalogo_id", key[9:])
+        if cls._parece_uuid(key):
+            return query.eq("ejercicio_tipo", "maquina").eq("maquina_id", key)
+        literal = key.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        return query.eq("ejercicio_tipo", "libre").ilike("nombre_libre", literal)
+
     @staticmethod
     def _parece_uuid(valor: str) -> bool:
-        """Chequeo básico de UUID v4. Evita mandar al backend algo que no es UUID."""
-        if len(valor) != 36:
+        try:
+            UUID(valor)
+            return True
+        except (ValueError, TypeError, AttributeError):
             return False
-        partes = valor.split("-")
-        return len(partes) == 5 and all(
-            len(p) == n for p, n in zip(partes, [8, 4, 4, 4, 12])
-        )

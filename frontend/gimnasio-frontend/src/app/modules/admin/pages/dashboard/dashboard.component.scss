@@ -78,6 +78,7 @@
   color: $color-text;
   margin: 0;
   line-height: 1.1;
+  small { font-size: $fs-sm; color: $color-text-muted; font-weight: $fw-medium; }
 }
 
 .dash__stat-label {
@@ -173,6 +174,8 @@
   font-weight: $fw-semibold;
   box-shadow: $shadow-xs;
 }
+.dash__nota { color: $color-text-muted; font-size: $fs-sm; line-height: 1.5; margin: 0 0 $space-4; }
+.dash__cobertura { padding: $space-3; border: 1px solid $color-border; border-radius: $radius-md; font-size: $fs-sm; line-height: 1.5; background: $color-bg-subtle; }
 .dash__section {
   margin-top: $section-gap-mobile;
   @include lg-up { margin-top: $section-gap; }

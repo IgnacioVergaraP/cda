@@ -15,5 +15,6 @@
     </article>
   </section>
   <section *ngIf="ejercicio.grupos_musculares.length" class="catalogo__seccion"><h2>Músculos trabajados</h2><app-muscle-map [muscles]="ejercicio.grupos_musculares"></app-muscle-map></section>
+  <app-ui-button *ngIf="auth.tieneRol('alumno')" variant="primary" routerLink="/progreso/registrar" [queryParams]="{ ejercicio_catalogo_id: ejercicio.id }">Registrar entrenamiento</app-ui-button>
   <app-ui-button *ngIf="auth.tieneRol('gimnasio')" variant="secondary" [routerLink]="['/admin/catalogo', ejercicio.id, 'editar']">Editar ejercicio</app-ui-button>
 </ng-container>

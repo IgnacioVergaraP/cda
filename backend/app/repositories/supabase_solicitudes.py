@@ -9,7 +9,7 @@ from app.extensions import get_supabase
 
 
 _COLUMNS = (
-    "id,estado,solicitante_id,solicitante_nombre,tipo_solicitud,"
+    "id,estado,solicitante_id,solicitante_nombre,tipo_solicitud,categoria,recurso_ids,ejercicio_catalogo_id_creado,"
     "nombre,grupos_musculares,descripcion,video_url,imagen_url,"
     "maquina_id_objetivo,maquina_id_creado,"
     "revisado_por_id,revisado_por_nombre,motivo_rechazo,"
@@ -31,6 +31,9 @@ def _row_a_solicitud(row: dict) -> SolicitudEjercicio:
         descripcion=row.get("descripcion", ""),
         video_url=row.get("video_url", ""),
         imagen_url=row.get("imagen_url", ""),
+        categoria=row.get("categoria"),
+        recurso_ids=list(row.get("recurso_ids") or []),
+        ejercicio_catalogo_id_creado=row.get("ejercicio_catalogo_id_creado"),
         maquina_id_objetivo=row.get("maquina_id_objetivo"),
         maquina_id_creado=row.get("maquina_id_creado"),
         revisado_por_id=row.get("revisado_por_id"),
@@ -47,8 +50,19 @@ class SupabaseSolicitudesRepository(SolicitudesRepository):
     def __init__(self):
         self._sb = get_supabase()
 
+    def aprobar_catalogo(self, solicitud, admin):
+        resp = self._sb.rpc("aprobar_solicitud_catalogo", {
+            "p_solicitud_id": solicitud.id, "p_gimnasio_id": admin.gimnasio_id,
+            "p_admin_id": admin.id,
+        }).execute()
+        if not resp.data:
+            return None
+        return _row_a_solicitud(resp.data)
+
     def crear(self, solicitud: SolicitudEjercicio) -> SolicitudEjercicio:
         payload = {
+            "categoria": solicitud.categoria,
+            "recurso_ids": list(solicitud.recurso_ids),
             "estado": solicitud.estado,
             "tipo_solicitud": solicitud.tipo_solicitud,
             "solicitante_id": solicitud.solicitante_id,

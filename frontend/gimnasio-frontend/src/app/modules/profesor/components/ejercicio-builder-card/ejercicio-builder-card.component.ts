@@ -1,7 +1,9 @@
+import { resumenCardio } from '../../../rutinas/models/rutina.model';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { UnidadPeso } from '../../../../shared/utils/peso';
 import { EjercicioBuilder, pesoBuilderValido } from '../../models/rutina-builder.model';
 import { Maquina } from '../../../maquinas/models/maquina.model';
+import { EjercicioCatalogo } from '../../../ejercicios/models/catalogo.model';
 
 @Component({
   selector: 'app-ejercicio-builder-card',
@@ -33,6 +35,7 @@ export class EjercicioBuilderCardComponent {
   }
 
   get nombreVisible(): string {
+    if (this.ejercicio.usar_catalogo) return this.ejercicio.catalogo?.nombre ?? 'Selecciona un ejercicio';
     if (this.ejercicio.tipo === 'maquina') {
       return this.ejercicio.maquina_nombre || 'Máquina sin seleccionar';
     }
@@ -40,8 +43,9 @@ export class EjercicioBuilderCardComponent {
   }
 
   get resumenSeries(): string {
+    if (this.esCardio) return resumenCardio(this.ejercicio);
     return `${this.ejercicio.series} × ${this.ejercicio.repeticiones}${
-      this.ejercicio.peso_sugerido ? ' · ' + this.ejercicio.peso_sugerido : ''
+      !this.esCardio && this.ejercicio.peso_sugerido ? ' · ' + this.ejercicio.peso_sugerido : ''
     }`;
   }
 
@@ -55,6 +59,33 @@ export class EjercicioBuilderCardComponent {
       copia.maquina_id = null;
       copia.maquina_nombre = null;
     }
+    this.cambio.emit(copia);
+  }
+
+  get esCardio(): boolean { return !!this.ejercicio.usar_catalogo && (this.ejercicio.catalogo?.categoria ?? this.ejercicio.categoria_seleccionada) === 'cardio'; }
+
+  onCategoriaChange(categoria: string): void {
+    this.cambio.emit({ ...this.ejercicio, categoria_seleccionada: categoria,
+      prescripcion_cardio: categoria === 'cardio' ? (this.ejercicio.prescripcion_cardio ?? {}) : null });
+  }
+  onCardioChange(campo: 'intensidad' | 'duracion_minutos' | 'distancia_km', valor: string | number | null): void {
+    this.cambio.emit({ ...this.ejercicio, prescripcion_cardio: { ...this.ejercicio.prescripcion_cardio, [campo]: valor === '' ? null : valor } });
+  }
+
+  cambiarOrigen(catalogo: boolean): void {
+    if (!!this.ejercicio.usar_catalogo === catalogo) return;
+    this.cambio.emit({ ...this.ejercicio, usar_catalogo: catalogo, ejercicio_catalogo_id: null,
+      catalogo: null, categoria_seleccionada: '', prescripcion_cardio: null, tipo: 'libre', maquina_id: null, maquina_nombre: null, nombre: null, descripcion: null });
+  }
+
+  onCatalogoChange(e: EjercicioCatalogo | null): void {
+    const copia: EjercicioBuilder = { ...this.ejercicio, usar_catalogo: true,
+      ejercicio_catalogo_id: e?.id ?? null, catalogo: e,
+      tipo: e?.maquina_origen_id ? 'maquina' : 'libre',
+      maquina_id: e?.maquina_origen_id ?? null, maquina_nombre: e?.nombre ?? null,
+      nombre: e?.nombre ?? null, descripcion: e?.descripcion ?? null };
+    copia.categoria_seleccionada = e?.categoria ?? this.ejercicio.categoria_seleccionada;
+    copia.prescripcion_cardio = copia.categoria_seleccionada === 'cardio' ? (this.ejercicio.prescripcion_cardio ?? {}) : null;
     this.cambio.emit(copia);
   }
 

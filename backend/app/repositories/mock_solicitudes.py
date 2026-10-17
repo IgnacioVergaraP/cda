@@ -54,6 +54,13 @@ class MockSolicitudesRepository(SolicitudesRepository):
     def _generar_id(self) -> str:
         return f"sol-{self._calcular_next_num():04d}"
 
+    def aprobar_catalogo(self, solicitud, admin):
+        from app.blueprints.ejercicios import services as catalogo
+        datos = {k: getattr(solicitud, k) for k in ("nombre", "categoria", "grupos_musculares", "descripcion", "video_url", "imagen_url")}
+        creado = catalogo.guardar_ejercicio(admin.gimnasio_id, datos, solicitud.recurso_ids)
+        return self.actualizar(solicitud.id, {"estado": "aprobada", "ejercicio_catalogo_id_creado": creado["id"],
+            "revisado_por_id": admin.id, "revisado_por_nombre": admin.nombre, "fecha_revision": _ahora_iso()})
+
     def crear(self, solicitud: SolicitudEjercicio) -> SolicitudEjercicio:
         solicitud.id = self._generar_id()
         solicitud.fecha_creacion = _ahora_iso()

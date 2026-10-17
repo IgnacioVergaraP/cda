@@ -17,6 +17,7 @@ import {
 import {
   CrearMantenimientoPayload,
   DashboardUso,
+  FiltroTipoRecurso,
   Mantenimiento,
   MaquinaMantenimientosResponse,
   RangoAnalytics,
@@ -150,8 +151,8 @@ export class AdminService {
 
   // -------- Dashboard de uso --------
 
-  obtenerDashboardUso(rango: RangoAnalytics): Observable<DashboardUso> {
-    const params = new HttpParams().set('rango', rango);
+  obtenerDashboardUso(rango: RangoAnalytics, tipo: FiltroTipoRecurso = ''): Observable<DashboardUso> {
+    const params = new HttpParams().set('rango', rango).set('tipo', tipo);
     return this.http
       .get<ApiResponse<DashboardUso>>(`${this.adminUrl}/dashboard/uso`, { params })
       .pipe(map(res => res.data));

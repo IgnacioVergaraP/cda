@@ -5,6 +5,7 @@ from app.errors import AuthError
 from app.domain.models import Rutina, Ejercicio
 from app.repositories.supabase_rutinas import SupabaseRutinasRepository
 from app.repositories.supabase_maquinas import SupabaseMaquinasRepository
+from app.blueprints.ejercicios import services as catalogo_services
 
 
 
@@ -72,11 +73,32 @@ def _resolver(rutina: Rutina) -> dict:
             maquina = _maquinas_repo.find_by_id(e.maquina_id, rutina.gimnasio_id)
             if maquina:
                 maquinas[maquina.id] = maquina
-    return rutina.to_dict_resuelto(maquinas)
+    data = rutina.to_dict_resuelto(maquinas)
+    ids = {e.ejercicio_catalogo_id for e in rutina.ejercicios if e.ejercicio_catalogo_id}
+    catalogo = {e["id"]: e for e in catalogo_services._repo.ejercicios_por_ids(ids, rutina.gimnasio_id)} if ids else {}
+    for e in data["ejercicios"]:
+        if e.get("ejercicio_catalogo_id"):
+            e["catalogo"] = catalogo.get(e["ejercicio_catalogo_id"])
+    return data
 
 
 def _validar_maquinas(usuario, payload):
+    ids = {e["ejercicio_catalogo_id"] for e in payload["ejercicios"] if e.get("ejercicio_catalogo_id")}
+    catalogo = {e["id"]: e for e in catalogo_services._repo.ejercicios_por_ids(ids, usuario.gimnasio_id)} if ids else {}
+    if len(catalogo) != len(ids):
+        raise AuthError(400, "InvalidEjercicio", "El ejercicio del catálogo no existe en tu gimnasio.")
     for e in payload["ejercicios"]:
+        if e.get("ejercicio_catalogo_id"):
+            elegido = catalogo[e["ejercicio_catalogo_id"]]
+            if e.get("prescripcion_cardio") is not None and elegido["categoria"] != "cardio":
+                raise AuthError(400, "InvalidEjercicio", "La prescripción de cardio solo corresponde a ejercicios de cardio.")
+            # Se mantiene el identificador antiguo para conservar la continuidad del progreso.
+            # Los ejercicios nuevos usan el formato libre hasta la etapa de registro por catálogo.
+            origen = elegido.get("maquina_origen_id")
+            e["tipo"] = "maquina" if origen else "libre"
+            e["maquina_id"] = origen
+            e["nombre"] = None if origen else elegido["nombre"]
+            e["descripcion"] = None if origen else elegido["descripcion"]
         if e["tipo"] == "maquina" and not _maquinas_repo.find_by_id(e["maquina_id"], usuario.gimnasio_id):
             raise AuthError(400, "InvalidMaquina", "La máquina no existe en tu gimnasio.")
 

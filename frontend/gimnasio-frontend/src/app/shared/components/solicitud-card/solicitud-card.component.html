@@ -22,6 +22,8 @@
     </app-ui-badge>
   </div>
 
+  <app-ui-badge *ngIf="solicitud.categoria" variant="primary">{{ etiquetaCategoria(solicitud.categoria) }}</app-ui-badge>
+  <p *ngFor="let r of solicitud.recursos" class="solicitud-card__revisor">{{ r.nombre }}<span *ngIf="r.numero_maquina"> · N.º {{ r.numero_maquina }}</span></p>
   <p class="solicitud-card__descripcion">{{ solicitud.descripcion }}</p>
 
   <div *ngIf="solicitud.estado === 'rechazada' && solicitud.motivo_rechazo" class="solicitud-card__motivo">

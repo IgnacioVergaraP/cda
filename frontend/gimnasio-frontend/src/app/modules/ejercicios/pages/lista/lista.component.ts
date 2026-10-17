@@ -6,7 +6,7 @@ import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { SharedModule } from '../../../../shared/shared.module';
 import { GRUPOS_MUSCULARES, etiquetaMusculo } from '../../../maquinas/models/maquina.model';
-import { CATEGORIAS, EjercicioCatalogo, etiquetaCategoria } from '../../models/catalogo.model';
+import { CATEGORIAS, EjercicioCatalogo, Recurso, etiquetaCategoria, etiquetaRecurso } from '../../models/catalogo.model';
 import { CatalogoService } from '../../services/catalogo.service';
 
 @Component({
@@ -27,6 +27,7 @@ export class ListaComponent implements OnInit, OnDestroy {
   readonly grupos = GRUPOS_MUSCULARES;
   readonly etiquetaMusculo = etiquetaMusculo;
   readonly etiquetaCategoria = etiquetaCategoria;
+  readonly etiquetaRecurso = etiquetaRecurso;
   private carga?: Subscription;
   constructor(private service: CatalogoService, private route: ActivatedRoute) {}
   ngOnInit(): void { this.gestion = this.route.snapshot.data['gestion'] === true; this.cargar(); }
@@ -44,4 +45,7 @@ export class ListaComponent implements OnInit, OnDestroy {
       });
   }
   trackById(_: number, ejercicio: EjercicioCatalogo): string { return ejercicio.id; }
+  repiteNombre(recurso: Recurso, ejercicio: EjercicioCatalogo): boolean {
+    return recurso.nombre.trim().toLocaleLowerCase('es') === ejercicio.nombre.trim().toLocaleLowerCase('es');
+  }
 }

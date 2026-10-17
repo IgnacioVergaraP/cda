@@ -122,8 +122,17 @@ export class RutinaBuilderComponent implements OnInit {
     if (this.ejercicios.length === 0 || this.ejercicios.length > 30) return false;
 
     for (const e of this.ejercicios) {
-      if (!e.repeticiones.trim()) return false;
-      if (!pesoBuilderValido(e)) return false;
+      const cardio = e.usar_catalogo && e.catalogo?.categoria === 'cardio';
+      if (cardio) {
+        const p = e.prescripcion_cardio;
+        if ((p?.intensidad?.length ?? 0) > 100) return false;
+        if (p?.duracion_minutos != null && (!Number.isFinite(p.duracion_minutos) || p.duracion_minutos <= 0 || p.duracion_minutos > 10080)) return false;
+        if (p?.distancia_km != null && (!Number.isFinite(p.distancia_km) || p.distancia_km <= 0 || p.distancia_km > 1000)) return false;
+      } else if (!e.repeticiones.trim() || !pesoBuilderValido(e)) return false;
+      if (e.usar_catalogo) {
+        if (!e.ejercicio_catalogo_id) return false;
+        continue;
+      }
       if (e.tipo === 'maquina' && !e.maquina_id) return false;
       if (e.tipo === 'libre' && !e.nombre?.trim()) return false;
     }
@@ -154,6 +163,9 @@ export class RutinaBuilderComponent implements OnInit {
       ...this.ejercicios,
       {
         uid: generarUid(),
+        usar_catalogo: true,
+        ejercicio_catalogo_id: null,
+        catalogo: null,
         tipo: 'maquina',
         series: 3,
         repeticiones: '10',
@@ -204,7 +216,7 @@ export class RutinaBuilderComponent implements OnInit {
 
   guardar(): void {
     if (!this.puedeGuardar) {
-      this.errorGuardar = 'Completá todos los campos obligatorios antes de guardar (incluido el peso sugerido).';
+      this.errorGuardar = 'Completá todos los campos obligatorios antes de guardar (el peso sugerido corresponde a ejercicios de fuerza).';
       return;
     }
 
@@ -213,7 +225,9 @@ export class RutinaBuilderComponent implements OnInit {
 
     const ejerciciosPayload = this.ejercicios.map(e => ({
       id: e.uid.startsWith('b-') ? undefined : e.uid,
+      ejercicio_catalogo_id: e.usar_catalogo ? e.ejercicio_catalogo_id : null,
       tipo: e.tipo,
+      prescripcion_cardio: e.usar_catalogo && e.catalogo?.categoria === 'cardio' ? (e.prescripcion_cardio ?? {}) : null,
       series: e.series,
       repeticiones: e.repeticiones.trim(),
       peso_sugerido: e.peso_sugerido.trim(),

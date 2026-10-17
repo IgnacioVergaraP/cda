@@ -45,5 +45,6 @@ class ProgresoRepository(ABC):
         alumno_id: str,
         peso: str,
         repeticiones: str,
+        **metricas,
     ) -> Optional[RegistroSerie]:
         ...

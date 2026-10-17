@@ -23,6 +23,7 @@ import { ReporteCardComponent } from './components/reporte-card/reporte-card.com
 import { SolicitudRutinaCardComponent } from './components/solicitud-rutina-card/solicitud-rutina-card.component';
 import { CalendarioListaComponent } from './components/calendario-lista/calendario-lista.component';
 import { MuscleMapComponent } from './components/muscle-map/muscle-map.component';
+import { EvolucionCardioComponent } from './components/evolucion-cardio/evolucion-cardio.component';
 
 @NgModule({
   declarations: [
@@ -46,10 +47,12 @@ import { MuscleMapComponent } from './components/muscle-map/muscle-map.component
     MuscleMapComponent,
   ],
   imports: [
+    EvolucionCardioComponent,
     CommonModule,
     RouterModule,
   ],
   exports: [
+    EvolucionCardioComponent,
     UiInputComponent,
     UiButtonComponent,
     UiCardComponent,

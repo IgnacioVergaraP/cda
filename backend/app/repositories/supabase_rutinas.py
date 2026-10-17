@@ -18,7 +18,7 @@ _COLS_RUTINA = (
 )
 _COLS_EJERCICIO = (
     "id,rutina_id,posicion,tipo,maquina_id,nombre_libre,descripcion_libre,"
-    "series,repeticiones,peso_sugerido"
+    "series,repeticiones,peso_sugerido,ejercicio_catalogo_id,prescripcion_cardio"
 )
 
 
@@ -31,6 +31,8 @@ def _row_a_ejercicio(row: dict) -> Ejercicio:
         series=row["series"],
         repeticiones=row["repeticiones"],
         peso_sugerido=row.get("peso_sugerido"),
+        ejercicio_catalogo_id=row.get("ejercicio_catalogo_id"),
+        prescripcion_cardio=row.get("prescripcion_cardio"),
         maquina_id=row.get("maquina_id") if tipo == "maquina" else None,
         nombre=row.get("nombre_libre") if tipo == "libre" else None,
         descripcion=row.get("descripcion_libre") if tipo == "libre" else None,
@@ -219,6 +221,8 @@ class SupabaseRutinasRepository(RutinasRepository):
                     "series": e.series,
                     "repeticiones": e.repeticiones,
                     "peso_sugerido": e.peso_sugerido,
+                    "ejercicio_catalogo_id": e.ejercicio_catalogo_id,
+                    "prescripcion_cardio": e.prescripcion_cardio,
                 })
             self._sb.table("rutina_ejercicios").insert(ejercicios_rows).execute()
 
@@ -280,6 +284,8 @@ class SupabaseRutinasRepository(RutinasRepository):
                         "series": e.series,
                         "repeticiones": e.repeticiones,
                         "peso_sugerido": e.peso_sugerido,
+                        "ejercicio_catalogo_id": e.ejercicio_catalogo_id,
+                        "prescripcion_cardio": e.prescripcion_cardio,
                     })
                 self._sb.table("rutina_ejercicios").insert(ejercicios_rows).execute()
 
@@ -337,6 +343,8 @@ class SupabaseRutinasRepository(RutinasRepository):
                     maquina_id=e.maquina_id,
                     nombre=e.nombre,
                     descripcion=e.descripcion,
+                    ejercicio_catalogo_id=e.ejercicio_catalogo_id,
+                    prescripcion_cardio=e.prescripcion_cardio,
                 )
                 for e in original.ejercicios
             ],

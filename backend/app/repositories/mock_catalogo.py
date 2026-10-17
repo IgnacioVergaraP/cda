@@ -51,6 +51,11 @@ class MockCatalogoRepository:
         e = self.ejercicios.get(id)
         return self._resolver(e) if e and e["gimnasio_id"] == gimnasio_id else None
 
+    def ejercicios_por_ids(self, ids, gimnasio_id):
+        self._sincronizar()
+        return [self._resolver(e) for e in self.ejercicios.values()
+                if e["id"] in ids and e["gimnasio_id"] == gimnasio_id]
+
     def listar_recursos(self, gimnasio_id, tipo="", buscar="", desde=0):
         self._sincronizar()
         rows = [deepcopy(r) for r in self.recursos.values() if r["gimnasio_id"] == gimnasio_id
@@ -62,6 +67,11 @@ class MockCatalogoRepository:
     def recursos_por_ids(self, ids, gimnasio_id):
         self._sincronizar()
         return [deepcopy(r) for id, r in self.recursos.items() if id in ids and r["gimnasio_id"] == gimnasio_id]
+
+    def iterar_recursos_uso(self, gimnasio_id):
+        self._sincronizar()
+        yield from (deepcopy(r) for r in sorted(self.recursos.values(), key=lambda r: r["id"])
+                    if r["gimnasio_id"] == gimnasio_id)
 
     def guardar_recurso(self, gimnasio_id, payload, recurso_id=None):
         if recurso_id and (recurso_id not in self.recursos or self.recursos[recurso_id]["gimnasio_id"] != gimnasio_id):

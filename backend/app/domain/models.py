@@ -123,6 +123,8 @@ class Ejercicio:
     maquina_id: Optional[str] = None
     nombre: Optional[str] = None
     descripcion: Optional[str] = None
+    ejercicio_catalogo_id: Optional[str] = None
+    prescripcion_cardio: Optional[dict] = None
 
 
 @dataclass
@@ -185,6 +187,8 @@ class Rutina:
             "series": e.series,
             "repeticiones": e.repeticiones,
             "peso_sugerido": e.peso_sugerido,
+            "ejercicio_catalogo_id": e.ejercicio_catalogo_id,
+            "prescripcion_cardio": e.prescripcion_cardio,
         }
         if e.tipo == "maquina":
             base["maquina_id"] = e.maquina_id
@@ -225,6 +229,15 @@ class RegistroSerie:
     maquina_id: Optional[str] = None
     nombre_libre: Optional[str] = None
     rutina_id: Optional[str] = None
+    ejercicio_catalogo_id: Optional[str] = None
+    modalidad: str = "fuerza"
+    peso_valor: Optional[float] = None
+    peso_unidad: Optional[str] = None
+    peso_kg: Optional[float] = None
+    repeticiones_valor: Optional[int] = None
+    duracion_segundos: Optional[int] = None
+    distancia_metros: Optional[float] = None
+    recursos: List[dict] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return {
@@ -239,6 +252,15 @@ class RegistroSerie:
             "maquina_id": self.maquina_id,
             "nombre_libre": self.nombre_libre,
             "rutina_id": self.rutina_id,
+            "ejercicio_catalogo_id": self.ejercicio_catalogo_id,
+            "modalidad": self.modalidad,
+            "peso_valor": self.peso_valor,
+            "peso_unidad": self.peso_unidad,
+            "peso_kg": self.peso_kg,
+            "repeticiones_valor": self.repeticiones_valor,
+            "duracion_segundos": self.duracion_segundos,
+            "distancia_metros": self.distancia_metros,
+            "recursos": [dict(r) for r in self.recursos],
         }
 
 
@@ -255,6 +277,9 @@ class SolicitudEjercicio:
     descripcion: str
     video_url: str
     imagen_url: str = ""
+    categoria: Optional[str] = None
+    recurso_ids: List[str] = field(default_factory=list)
+    ejercicio_catalogo_id_creado: Optional[str] = None
     maquina_id_objetivo: Optional[str] = None
     maquina_id_creado: Optional[str] = None
     revisado_por_id: Optional[str] = None
@@ -276,6 +301,9 @@ class SolicitudEjercicio:
             "descripcion": self.descripcion,
             "video_url": self.video_url,
             "imagen_url": self.imagen_url,
+            "categoria": self.categoria,
+            "recurso_ids": list(self.recurso_ids),
+            "ejercicio_catalogo_id_creado": self.ejercicio_catalogo_id_creado,
             "maquina_id_objetivo": self.maquina_id_objetivo,
             "maquina_id_creado": self.maquina_id_creado,
             "revisado_por_id": self.revisado_por_id,

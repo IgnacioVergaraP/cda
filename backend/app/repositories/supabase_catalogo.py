@@ -35,6 +35,13 @@ class SupabaseCatalogoRepository:
                 .eq("id", ejercicio_id).eq("gimnasio_id", gimnasio_id).limit(1).execute().data or [])
         return _ejercicio(rows[0]) if rows else None
 
+    def ejercicios_por_ids(self, ids, gimnasio_id):
+        if not ids:
+            return []
+        rows = (self._sb.table("ejercicios_catalogo").select(_COLS_EJERCICIO)
+                .eq("gimnasio_id", gimnasio_id).in_("id", list(ids)).execute().data or [])
+        return [_ejercicio(r) for r in rows]
+
     def listar_recursos(self, gimnasio_id, tipo="", buscar="", desde=0):
         query = self._sb.table("recursos_gimnasio").select(_COLS_RECURSO).eq("gimnasio_id", gimnasio_id)
         if tipo:
@@ -44,6 +51,16 @@ class SupabaseCatalogoRepository:
             patron = self._patron(buscar).replace("\\", "\\\\").replace('"', '\\"')
             query = query.or_(f'nombre.ilike."{patron}",numero_maquina.ilike."{patron}"')
         return query.order("nombre").order("id").range(desde, desde + 24).execute().data or []
+
+    def iterar_recursos_uso(self, gimnasio_id):
+        desde = 0
+        while True:
+            rows = (self._sb.table("recursos_gimnasio").select("id,nombre,tipo,numero_maquina,gimnasio_id")
+                    .eq("gimnasio_id", gimnasio_id).order("id").range(desde, desde + 999).execute().data or [])
+            yield from rows
+            if len(rows) < 1000:
+                break
+            desde += len(rows)
 
     def recursos_por_ids(self, ids, gimnasio_id):
         if not ids:

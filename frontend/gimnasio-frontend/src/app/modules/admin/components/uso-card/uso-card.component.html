@@ -1,12 +1,11 @@
-<div class="uc" [class.uc--baja]="variante === 'baja'">
-
+<article class="uc" [class.uc--baja]="variante === 'baja'">
   <div class="uc__header">
-    <p class="uc__nombre">{{ maquina.maquina_nombre }}</p>
-    <span class="uc__valor">{{ maquina.cantidad_series }}</span>
+    <div class="uc__info">
+      <h4 class="uc__nombre">{{ recurso.nombre }}<span *ngIf="recurso.numero_maquina" class="uc__numero"> · N.º {{ recurso.numero_maquina }}</span></h4>
+      <p class="uc__meta">{{ etiquetaRecurso(recurso.tipo) }} · {{ recurso.alumnos_unicos }} alumnos</p>
+    </div>
+    <p class="uc__valor">{{ recurso.cantidad_registros }}<small> usos</small></p>
   </div>
-
-  <div class="uc__barra">
-    <div class="uc__barra-fill" [style.width.%]="porcentaje"></div>
-  </div>
-
-</div>
+  <div class="uc__barra" aria-hidden="true"><div class="uc__barra-fill" [style.width.%]="porcentaje"></div></div>
+  <p class="uc__meta">{{ recurso.registros_fuerza }} series de fuerza · {{ recurso.registros_cardio }} bloques de cardio</p>
+</article>

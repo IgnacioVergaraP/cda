@@ -25,14 +25,14 @@
       </p>
       <p class="ejercicio-item__meta">
         {{ resumenSeries }}
-        <span *ngIf="ejercicio.peso_sugerido"> · {{ ejercicio.peso_sugerido }}</span>
+        <span *ngIf="ejercicio.peso_sugerido && ejercicio.catalogo?.categoria !== 'cardio'"> · {{ ejercicio.peso_sugerido }}</span>
       </p>
     </div>
 
     <i
       class="bi ejercicio-item__chevron"
-      [class.bi-chevron-right]="esMaquina"
-      [class.bi-info-circle]="esLibre"
+      [class.bi-chevron-right]="!!ejercicio.ejercicio_catalogo_id || esMaquina"
+      [class.bi-info-circle]="!ejercicio.ejercicio_catalogo_id && esLibre"
       aria-hidden="true">
     </i>
   </button>

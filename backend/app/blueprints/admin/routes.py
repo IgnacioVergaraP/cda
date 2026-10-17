@@ -67,7 +67,8 @@ def eliminar_horario(horario_id: str):
 @requiere_rol("gimnasio")
 def dashboard_uso():
     rango = request.args.get("rango", "30d")
-    return ok(services.obtener_dashboard_uso(rango, g.usuario_actual.gimnasio_id))
+    tipo = request.args.get("tipo", "")
+    return ok(services.obtener_dashboard_uso(rango, g.usuario_actual.gimnasio_id, tipo))
 
 
 # -------- Mantenciones --------

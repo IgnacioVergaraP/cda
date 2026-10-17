@@ -1,0 +1,32 @@
+<div class="mp">
+  <div *ngIf="seleccionado" class="mp__seleccionada">
+    <app-muscle-map [muscles]="seleccionado.grupos_musculares" [primaryOnly]="true" [compact]="true"></app-muscle-map>
+    <div class="mp__seleccionada-info">
+      <p class="mp__seleccionada-nombre">{{ seleccionado.nombre }}</p>
+      <p class="mp__seleccionada-tags">{{ etiquetaCategoria(seleccionado.categoria) }}</p>
+      <p *ngFor="let r of seleccionado.recursos" class="mp__seleccionada-tags">{{ r.nombre }}<span *ngIf="r.numero_maquina"> · N.º {{ r.numero_maquina }}</span></p>
+    </div>
+    <button type="button" class="mp__quitar" aria-label="Cambiar ejercicio" (click)="quitar()"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+  </div>
+  <div *ngIf="!seleccionado" class="mp__picker">
+    <input type="search" class="mp__search" aria-label="Buscar ejercicio del catálogo" placeholder="Buscar ejercicio…" maxlength="80" [(ngModel)]="buscar" (ngModelChange)="cargar()" />
+    <div class="mp__chips" role="group" aria-label="Tipo de ejercicio">
+      <button type="button" class="mp__chip" [class.mp__chip--active]="!categoria" (click)="cambiarCategoria('')">Todos</button>
+      <button *ngFor="let c of categorias" type="button" class="mp__chip" [class.mp__chip--active]="categoria === c.value" (click)="cambiarCategoria(c.value)">{{ c.label }}</button>
+    </div>
+    <select class="mp__search" aria-label="Grupo muscular" [(ngModel)]="musculo" (ngModelChange)="cargar()">
+      <option value="">Todos los músculos</option>
+      <option *ngFor="let g of grupos" [value]="g">{{ etiquetaMusculo(g) }}</option>
+    </select>
+    <p *ngIf="cargando" class="mp__loading" role="status">Cargando ejercicios…</p>
+    <div *ngIf="error" role="alert"><p>{{ error }}</p><button type="button" class="mp__chip" (click)="cargar()">Reintentar</button></div>
+    <ul class="mp__lista" *ngIf="!error">
+      <li *ngFor="let e of ejercicios"><button type="button" class="mp__item" (click)="seleccionChange.emit(e)">
+        <app-muscle-map [muscles]="e.grupos_musculares" [primaryOnly]="true" [compact]="true"></app-muscle-map>
+        <span class="mp__item-nombre">{{ e.nombre }} · {{ etiquetaCategoria(e.categoria) }}</span>
+      </button></li>
+    </ul>
+    <p *ngIf="!cargando && !error && !ejercicios.length" class="mp__vacio">Sin ejercicios para estos filtros.</p>
+    <button *ngIf="hayMas && !error" type="button" class="mp__chip" [disabled]="cargando" (click)="cargar(true)">Cargar más</button>
+  </div>
+</div>

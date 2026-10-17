@@ -13,7 +13,7 @@
     <div class="historial-item__body">
       <p class="historial-item__titulo">{{ fila.ejercicio }}</p>
       <p class="historial-item__meta">
-        {{ fila.cantidad_series }} serie{{ fila.cantidad_series === 1 ? '' : 's' }}
+        {{ fila.cantidad_series }} {{ fila.modalidad === 'cardio' ? 'bloque' : 'serie' }}{{ fila.cantidad_series === 1 ? '' : 's' }}
         · {{ fechaFormateada }}
       </p>
     </div>
@@ -24,7 +24,7 @@
   <button
     type="button"
     class="historial-item__editar"
-    aria-label="Editar series"
+    aria-label="Editar registros"
     (click)="onEditar($event)">
     <i class="bi bi-pencil" aria-hidden="true"></i>
   </button>

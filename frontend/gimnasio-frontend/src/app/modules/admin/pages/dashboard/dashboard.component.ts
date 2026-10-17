@@ -1,81 +1,44 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-
 import { AdminService } from '../../services/admin.service';
-import {
-  DashboardUso,
-  RANGOS,
-  RangoAnalytics,
-} from '../../models/analytics.model';
+import { DashboardUso, FiltroTipoRecurso, RANGOS, RangoAnalytics, RecursoUso } from '../../models/analytics.model';
+import { TIPOS_RECURSO } from '../../../ejercicios/models/catalogo.model';
 
 type VistaRanking = 'top' | 'bottom';
 
-@Component({
-  selector: 'app-admin-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss'],
-})
-export class DashboardComponent implements OnInit {
-
+@Component({ selector: 'app-admin-dashboard', templateUrl: './dashboard.component.html', styleUrls: ['./dashboard.component.scss'] })
+export class DashboardComponent implements OnInit, OnDestroy {
   rango: RangoAnalytics = '30d';
+  tipo: FiltroTipoRecurso = '';
   vista: VistaRanking = 'top';
   data: DashboardUso | null = null;
-
   cargando = false;
   errorMensaje: string | null = null;
-
   readonly rangos = RANGOS;
-
+  readonly tipos = TIPOS_RECURSO;
+  private carga?: Subscription;
   constructor(private adminService: AdminService) {}
-
-  ngOnInit(): void {
-    this.cargar();
+  ngOnInit(): void { this.cargar(); }
+  ngOnDestroy(): void { this.carga?.unsubscribe(); }
+  setRango(rango: RangoAnalytics): void {
+    if (this.rango !== rango) { this.rango = rango; this.cargar(); }
   }
-
-  setRango(r: RangoAnalytics): void {
-    if (this.rango === r) return;
-    this.rango = r;
-    this.cargar();
+  setTipo(tipo: FiltroTipoRecurso): void {
+    if (this.tipo !== tipo) { this.tipo = tipo; this.cargar(); }
   }
-
-  setVista(v: VistaRanking): void {
-    this.vista = v;
-  }
-
+  setVista(vista: VistaRanking): void { this.vista = vista; }
   reintentar(): void { this.cargar(); }
-
-  get lista(): { maquina_id: string; maquina_nombre: string; cantidad_series: number }[] {
-    if (!this.data) return [];
-    return this.vista === 'top' ? this.data.top_usadas : this.data.menos_usadas;
-  }
-
-  get maximo(): number {
-    if (this.lista.length === 0) return 1;
-    const max = Math.max(...this.lista.map(m => m.cantidad_series));
-    return max > 0 ? max : 1;
-  }
-
-  get tituloVista(): string {
-    return this.vista === 'top' ? 'Más usadas' : 'Menos usadas';
-  }
-
-  get iconoVista(): string {
-    return this.vista === 'top' ? 'bi-trophy' : 'bi-exclamation-circle';
-  }
-
+  get lista(): RecursoUso[] { return (this.vista === 'top' ? this.data?.top_usadas : this.data?.menos_usadas) ?? []; }
+  get maximo(): number { return this.data?.top_usadas[0]?.cantidad_registros || 1; }
+  get tituloVista(): string { return this.vista === 'top' ? 'Más utilizados' : 'Menos utilizados'; }
   private cargar(): void {
-    this.cargando = true;
-    this.errorMensaje = null;
-
-    this.adminService
-      .obtenerDashboardUso(this.rango)
-      .pipe(finalize(() => (this.cargando = false)))
-      .subscribe({
-        next: (d) => (this.data = d),
-        error: (err: any) => {
-          this.errorMensaje = err?.error?.error?.message ?? 'No se pudo cargar el dashboard.';
-          this.data = null;
-        },
+    this.carga?.unsubscribe();
+    this.cargando = true; this.errorMensaje = null; this.data = null;
+    this.carga = this.adminService.obtenerDashboardUso(this.rango, this.tipo)
+      .pipe(finalize(() => (this.cargando = false))).subscribe({
+        next: data => { this.data = data; },
+        error: err => { this.errorMensaje = err?.error?.error?.message ?? 'No se pudo cargar el uso de recursos.'; },
       });
   }
 }

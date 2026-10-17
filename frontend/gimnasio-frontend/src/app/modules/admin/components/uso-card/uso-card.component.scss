@@ -25,7 +25,7 @@
   color: $color-text;
   margin: 0;
 
-  @include truncate;
+  overflow-wrap: anywhere;
 }
 
 .uc__valor {
@@ -35,7 +35,13 @@
   font-weight: $fw-semibold;
   color: $color-primary;
   flex-shrink: 0;
+  margin: 0;
+  small { font-family: $font-family-base; font-size: $fs-xs; font-weight: $fw-medium; }
 }
+
+.uc__info { min-width: 0; }
+.uc__meta { font-size: $fs-xs; color: $color-text-muted; margin: 4px 0 0; }
+.uc__numero { color: $color-primary; white-space: nowrap; }
 
 .uc__barra {
   height: 6px;

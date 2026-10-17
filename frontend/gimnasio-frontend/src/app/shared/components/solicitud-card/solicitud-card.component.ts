@@ -1,3 +1,4 @@
+import { etiquetaCategoria } from '../../../modules/ejercicios/models/catalogo.model';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { EstadoSolicitud, Solicitud } from '../../../modules/profesor/models/solicitud.model';
 
@@ -8,6 +9,7 @@ import { EstadoSolicitud, Solicitud } from '../../../modules/profesor/models/sol
 })
 export class SolicitudCardComponent {
 
+  readonly etiquetaCategoria = etiquetaCategoria;
   @Input() solicitud!: Solicitud;
   @Input() mostrarAcciones = false;
 

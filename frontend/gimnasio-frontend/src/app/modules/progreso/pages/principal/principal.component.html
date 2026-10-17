@@ -24,10 +24,10 @@
     *ngIf="historial.length === 0"
     icon="bi-graph-up-arrow"
     title="Sin registros todavía"
-    message="Empezá a registrar tus series para ver tu evolución.">
+    message="Empieza a registrar tus entrenamientos para ver tu evolución.">
     <app-ui-button variant="primary" (clicked)="irARegistrarLibre()">
       <i class="bi bi-plus-lg" aria-hidden="true"></i>
-      Registrar serie
+      Registrar entrenamiento
     </app-ui-button>
   </app-ui-empty-state>
 
@@ -47,10 +47,11 @@
       </div>
 
     <app-grafico-evolucion
-    *ngIf="!cargandoEvolucion"
+    *ngIf="!cargandoEvolucion && evolucion.modalidad !== 'cardio'"
     [puntos]="evolucion.puntos"
     [prHistorico]="evolucion.pr_historico">
     </app-grafico-evolucion>
+    <app-evolucion-cardio *ngIf="!cargandoEvolucion && evolucion.modalidad === 'cardio'" [puntos]="evolucion.puntos"></app-evolucion-cardio>
     </app-ui-card>
 
     <section class="progreso__historial">
@@ -73,7 +74,7 @@
 <button
   type="button"
   class="progreso__fab"
-  aria-label="Registrar serie"
+  aria-label="Registrar entrenamiento"
   (click)="irARegistrarLibre()">
   <i class="bi bi-plus-lg" aria-hidden="true"></i>
 </button>
@@ -106,27 +107,7 @@
         Editando serie #{{ serieEnEdicion.numero_serie }}
       </p>
 
-      <section class="progreso__sesion-steppers">
-        <app-stepper
-          label="Peso"
-          sufijo="kg"
-          [valor]="pesoEdicion"
-          [paso]="2.5"
-          [min]="0"
-          [max]="500"
-          (valorChange)="onPesoEdicionChange($event)">
-        </app-stepper>
-
-        <app-stepper
-          label="Repeticiones"
-          sufijo="reps"
-          [valor]="repsEdicion"
-          [paso]="1"
-          [min]="1"
-          [max]="200"
-          (valorChange)="onRepsEdicionChange($event)">
-        </app-stepper>
-      </section>
+      <app-metricas-registro [(valor)]="metricasEdicion"></app-metricas-registro>
 
       <div *ngIf="errorEdicion" class="progreso__sesion-error" role="alert">
         <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
@@ -144,6 +125,7 @@
           variant="primary"
           [block]="true"
           [loading]="guardandoEdicion"
+          [disabled]="!metricasValidas(metricasEdicion) || guardandoEdicion"
           (clicked)="guardarEdicionSerie()">
           Guardar
         </app-ui-button>
@@ -160,7 +142,7 @@
 
           <span class="progreso__sesion-serie-num">#{{ s.numero_serie }}</span>
           <span class="progreso__sesion-serie-resumen">
-            {{ s.peso }} × {{ s.repeticiones }} reps
+            {{ resumenRegistro(s) }}
           </span>
 
           <button

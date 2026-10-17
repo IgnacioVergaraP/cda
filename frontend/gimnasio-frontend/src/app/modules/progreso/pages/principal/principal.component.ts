@@ -1,4 +1,4 @@
-import { pesoEnKg } from '../../../../shared/utils/peso';
+import { metricasFormulario, metricasPayload, metricasValidas, resumenRegistro } from '../../models/metricas-registro';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
@@ -33,8 +33,9 @@ export class PrincipalComponent implements OnInit {
 
   // Serie en edición (dentro del sheet)
   serieEnEdicion: SerieEnSesion | null = null;
-  pesoEdicion = 0;
-  repsEdicion = 0;
+  metricasEdicion = metricasFormulario();
+  readonly metricasValidas = metricasValidas;
+  readonly resumenRegistro = resumenRegistro;
   guardandoEdicion = false;
   errorEdicion: string | null = null;
 
@@ -56,16 +57,16 @@ export class PrincipalComponent implements OnInit {
   }
 
   verEvolucion(fila: HistorialFila): void {
-    const key = fila.ejercicio_tipo === 'maquina'
+    const key = fila.ejercicio_key ?? (fila.ejercicio_tipo === 'maquina'
       ? (fila.maquina_id ?? '')
-      : (fila.nombre_libre ?? '');
+      : (fila.nombre_libre ?? ''));
     if (key) this.cargarEvolucion(key);
   }
 
   abrirEdicionSesion(fila: HistorialFila): void {
-    const key = fila.ejercicio_tipo === 'maquina'
+    const key = fila.ejercicio_key ?? (fila.ejercicio_tipo === 'maquina'
       ? (fila.maquina_id ?? '')
-      : (fila.nombre_libre ?? '');
+      : (fila.nombre_libre ?? ''));
     const fecha = fila.fecha.substring(0, 10);
 
     if (!key || !fecha) return;
@@ -105,8 +106,7 @@ export class PrincipalComponent implements OnInit {
 
   editarSerie(s: SerieEnSesion): void {
     this.serieEnEdicion = s;
-    this.pesoEdicion = this.parsePeso(s.peso) ?? 0;
-    this.repsEdicion = this.parseReps(s.repeticiones) ?? 0;
+    this.metricasEdicion = metricasFormulario(s);
     this.errorEdicion = null;
   }
 
@@ -115,20 +115,15 @@ export class PrincipalComponent implements OnInit {
     this.errorEdicion = null;
   }
 
-  onPesoEdicionChange(v: number): void { this.pesoEdicion = v; }
-  onRepsEdicionChange(v: number): void { this.repsEdicion = v; }
 
   guardarEdicionSerie(): void {
-    if (!this.serieEnEdicion || this.guardandoEdicion) return;
+    if (!this.serieEnEdicion || this.guardandoEdicion || !metricasValidas(this.metricasEdicion)) return;
 
     this.guardandoEdicion = true;
     this.errorEdicion = null;
 
     const id = this.serieEnEdicion.id;
-    const payload = {
-      peso: `${this.pesoEdicion} kg`,
-      repeticiones: String(this.repsEdicion),
-    };
+    const payload = metricasPayload(this.metricasEdicion);
 
     this.progresoService
       .actualizarSerie(id, payload)
@@ -140,7 +135,7 @@ export class PrincipalComponent implements OnInit {
               ...this.sesion,
               series: this.sesion.series.map(s =>
                 s.id === actualizado.id
-                  ? { ...s, peso: actualizado.peso, repeticiones: actualizado.repeticiones }
+                  ? { ...s, ...actualizado }
                   : s,
               ),
             };
@@ -163,7 +158,7 @@ export class PrincipalComponent implements OnInit {
   }
 
   trackByFila(_: number, f: HistorialFila): string {
-    return `${f.maquina_id ?? f.nombre_libre}-${f.fecha}`;
+    return `${f.ejercicio_key ?? f.maquina_id ?? f.nombre_libre}-${f.modalidad}-${f.fecha}`;
   }
 
   trackBySerie(_: number, s: SerieEnSesion): string {
@@ -179,7 +174,7 @@ export class PrincipalComponent implements OnInit {
     });
 
     if (this.evolucion) {
-      const key = this.evolucion.maquina_id ?? this.evolucion.nombre_libre ?? '';
+      const key = this.evolucion.ejercicio_key ?? this.evolucion.maquina_id ?? this.evolucion.nombre_libre ?? '';
       if (key) {
         this.progresoService.obtenerEvolucion(key).subscribe({
           next: (e: Evolucion) => (this.evolucion = e),
@@ -200,9 +195,9 @@ export class PrincipalComponent implements OnInit {
           this.historial = data;
           if (data.length > 0) {
             const first = data[0];
-            const key = first.ejercicio_tipo === 'maquina'
+            const key = first.ejercicio_key ?? (first.ejercicio_tipo === 'maquina'
               ? (first.maquina_id ?? '')
-              : (first.nombre_libre ?? '');
+              : (first.nombre_libre ?? ''));
             if (key) this.cargarEvolucion(key);
           }
         },
@@ -225,12 +220,4 @@ export class PrincipalComponent implements OnInit {
       });
   }
 
-  private parsePeso(s: string): number | null {
-    return pesoEnKg(s);
-  }
-
-  private parseReps(s: string): number | null {
-    const match = s.match(/\d+/);
-    return match ? Number(match[0]) : null;
-  }
 }

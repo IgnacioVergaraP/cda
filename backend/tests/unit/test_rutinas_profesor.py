@@ -97,7 +97,7 @@ def test_crear_maquina_inexistente_en_ejercicio(client, mock_auth):
     resp = client.post(
         "/api/profesor/rutinas", json=payload, headers=mock_auth.as_profesor()
     )
-    assert resp.status_code == 201
+    assert resp.status_code == 400
 
 
 def test_crear_sin_peso_falla(client, mock_auth):

@@ -1,0 +1,25 @@
+<div class="metricas" *ngIf="valor.modalidad === 'cardio'; else fuerza">
+  <label>Duración (minutos)
+    <input type="number" min="0.016667" max="10080" step="any" inputmode="decimal" placeholder="Ej: 20" [ngModel]="valor.duracion_segundos === null ? null : valor.duracion_segundos / 60" (ngModelChange)="minutos($event)" />
+  </label>
+  <label>Distancia (km)
+    <input type="number" min="0.00001" max="1000" step="any" inputmode="decimal" placeholder="Ej: 2.5" [ngModel]="valor.distancia_metros === null ? null : valor.distancia_metros / 1000" (ngModelChange)="kilometros($event)" />
+  </label>
+  <p class="metricas__nota">Registra duración, distancia o ambas.</p>
+</div>
+<ng-template #fuerza>
+  <div class="metricas">
+    <label>Peso o resistencia
+      <span class="metricas__peso">
+        <select aria-label="Unidad de peso" [ngModel]="valor.peso_unidad" (ngModelChange)="cambiar('peso_unidad', $event)"><option value="kg">kg</option><option value="lb">lb</option><option value="otro">Otro</option></select>
+        <input *ngIf="valor.peso_unidad !== 'otro' && !conSteppers" aria-label="Cantidad de peso" type="number" min="0" max="10000" step="any" inputmode="decimal" [ngModel]="valor.peso_valor" (ngModelChange)="cambiar('peso_valor', $event)" />
+        <input *ngIf="valor.peso_unidad === 'otro'" aria-label="Descripción de resistencia" type="text" maxlength="100" placeholder="Peso corporal, banda media…" [ngModel]="valor.peso_texto" (ngModelChange)="cambiar('peso_texto', $event)" />
+      </span>
+    </label>
+    <app-stepper *ngIf="conSteppers && valor.peso_unidad !== 'otro'" label="Peso" [sufijo]="valor.peso_unidad" [valor]="valor.peso_valor ?? 0" [paso]="valor.peso_unidad === 'lb' ? 5 : 2.5" [min]="0" [max]="10000" (valorChange)="cambiar('peso_valor', $event)"></app-stepper>
+    <app-stepper *ngIf="conSteppers" label="Repeticiones" sufijo="reps" [valor]="valor.repeticiones_valor ?? 10" [paso]="1" [min]="1" [max]="10000" (valorChange)="cambiar('repeticiones_valor', $event)"></app-stepper>
+    <label *ngIf="!conSteppers">Repeticiones
+      <input type="number" min="1" max="10000" step="1" inputmode="numeric" [ngModel]="valor.repeticiones_valor" (ngModelChange)="cambiar('repeticiones_valor', $event)" />
+    </label>
+  </div>
+</ng-template>

@@ -1,20 +1,14 @@
 import { Component, Input } from '@angular/core';
-import { MaquinaUso } from '../../models/analytics.model';
+import { RecursoUso } from '../../models/analytics.model';
+import { etiquetaRecurso } from '../../../ejercicios/models/catalogo.model';
 
-@Component({
-  selector: 'app-uso-card',
-  templateUrl: './uso-card.component.html',
-  styleUrls: ['./uso-card.component.scss'],
-})
+@Component({ selector: 'app-uso-card', templateUrl: './uso-card.component.html', styleUrls: ['./uso-card.component.scss'] })
 export class UsoCardComponent {
-
-  @Input() maquina!: MaquinaUso;
+  @Input() recurso!: RecursoUso;
   @Input() maximo = 1;
   @Input() variante: 'top' | 'baja' = 'top';
-
+  readonly etiquetaRecurso = etiquetaRecurso;
   get porcentaje(): number {
-    if (this.maximo <= 0) return 0;
-    const pct = (this.maquina.cantidad_series / this.maximo) * 100;
-    return Math.max(4, Math.min(100, Math.round(pct)));
+    return this.maximo > 0 ? Math.max(0, Math.min(100, this.recurso.cantidad_registros / this.maximo * 100)) : 0;
   }
 }

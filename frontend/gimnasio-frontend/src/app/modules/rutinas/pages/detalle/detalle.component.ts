@@ -76,6 +76,7 @@ export class DetalleComponent implements OnInit {
 
   get sheetTitulo(): string {
     if (!this.ejercicioEnSheet) return '';
+    if (this.ejercicioEnSheet.catalogo) return this.ejercicioEnSheet.catalogo.nombre;
     return this.sheetEsMaquina
       ? (this.ejercicioEnSheet.maquina?.nombre ?? 'Máquina')
       : (this.ejercicioEnSheet.nombre ?? 'Ejercicio');
@@ -83,6 +84,7 @@ export class DetalleComponent implements OnInit {
 
   get sheetDescripcion(): string | null {
     if (!this.ejercicioEnSheet) return null;
+    if (this.ejercicioEnSheet.catalogo) return this.ejercicioEnSheet.catalogo.descripcion;
     return this.sheetEsMaquina
       ? (this.ejercicioEnSheet.maquina?.descripcion ?? null)
       : (this.ejercicioEnSheet.descripcion ?? null);
@@ -90,6 +92,7 @@ export class DetalleComponent implements OnInit {
 
   get sheetMuscles(): string[] {
     if (!this.ejercicioEnSheet) return [];
+    if (this.ejercicioEnSheet.catalogo) return this.ejercicioEnSheet.catalogo.grupos_musculares;
     if (this.ejercicioEnSheet.tipo === 'maquina') {
       return this.ejercicioEnSheet.maquina?.grupos_musculares ?? this.rutina?.grupos_musculares ?? [];
     }
@@ -102,6 +105,12 @@ export class DetalleComponent implements OnInit {
   }
 
   verDetalleMaquina(): void {
+    if (this.ejercicioEnSheet?.ejercicio_catalogo_id) {
+      const id = this.ejercicioEnSheet.ejercicio_catalogo_id;
+      this.cerrarSheet();
+      this.router.navigate(['/ejercicios', id]);
+      return;
+    }
     if (!this.ejercicioEnSheet?.maquina_id) return;
     const id = this.ejercicioEnSheet.maquina_id;
     this.cerrarSheet();
@@ -124,6 +133,7 @@ export class DetalleComponent implements OnInit {
 
     this.router.navigate(['/progreso/registrar'], {
       queryParams: {
+        ejercicio_catalogo_id: ej.ejercicio_catalogo_id ?? null,
         tipo: ej.tipo,
         maquina_id: esMaquina ? (ej.maquina_id ?? null) : null,
         nombre: esMaquina
@@ -131,7 +141,9 @@ export class DetalleComponent implements OnInit {
           : (ej.nombre ?? ''),
         rutina_id: this.rutina.id,
         volver_a: this.router.url,
-        series: ej.series,
+        series: ej.catalogo?.categoria === 'cardio' ? null : ej.series,
+        duracion_minutos: ej.prescripcion_cardio?.duracion_minutos ?? null,
+        distancia_km: ej.prescripcion_cardio?.distancia_km ?? null,
         peso: ej.peso_sugerido ?? null,
         repeticiones: ej.repeticiones,
       },
@@ -158,10 +170,14 @@ export class DetalleComponent implements OnInit {
   }
 
   private construirVideoUrlSeguro(ejercicio: Ejercicio): SafeResourceUrl | null {
-    if (ejercicio.tipo !== 'maquina') return null;
-    const url = ejercicio.maquina?.video_url;
+    const url = ejercicio.catalogo?.video_url ?? ejercicio.maquina?.video_url;
     if (!url) return null;
-    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol === 'https:' && ['www.youtube.com', 'www.youtube-nocookie.com'].includes(parsed.hostname)
+          && parsed.pathname.startsWith('/embed/')) return this.sanitizer.bypassSecurityTrustResourceUrl(parsed.href);
+    } catch { /* Los videos antiguos no válidos no se incrustan. */ }
+    return null;
   }
 
   private cargar(id: string): void {
