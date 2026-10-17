@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { RutinaBuilderModule } from '../rutinas/rutina-builder.module';
+import { CatalogoComponent } from '../explorar/pages/catalogo/catalogo.component';
+import { RutinaDetalleModule } from '../rutinas/rutina-detalle.module';
 import { ProfesorRoutingModule } from './profesor-routing.module';
 import { SharedModule } from '../../shared/shared.module';
 
@@ -48,6 +50,8 @@ import { TabSolicitudesComponent } from './components/detalle-alumno-tabs/tab-so
     SharedModule,
     ProfesorRoutingModule,
     RutinaBuilderModule,
+    CatalogoComponent,
+    RutinaDetalleModule,
   ],
 })
 export class ProfesorModule {}

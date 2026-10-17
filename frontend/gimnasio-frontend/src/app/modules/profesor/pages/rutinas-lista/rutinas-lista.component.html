@@ -1,9 +1,12 @@
 <app-ui-page-header
   title="Rutinas"
-  subtitle="Rutinas que creaste">
+  subtitle="Rutinas asignadas a tus alumnos">
 </app-ui-page-header>
 
 <div class="rl__cta">
+  <app-ui-button variant="secondary" routerLink="/profesor/publicaciones">
+    <i class="bi bi-globe" aria-hidden="true"></i> Mis publicaciones
+  </app-ui-button>
   <app-ui-button variant="primary" [block]="true" (clicked)="irANueva()">
     <i class="bi bi-plus-lg" aria-hidden="true"></i>
     Nueva rutina

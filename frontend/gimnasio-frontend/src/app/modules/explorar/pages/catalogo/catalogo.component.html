@@ -1,0 +1,74 @@
+<app-ui-page-header
+  [title]="gestion ? 'Mis publicaciones' : 'Explorar'"
+  [subtitle]="gestion ? 'Comparte entrenamientos con tu gimnasio' : 'Descubre entrenamientos de los profesores de tu gimnasio'">
+</app-ui-page-header>
+
+<div *ngIf="gestion" class="catalogo__acciones">
+  <app-ui-button variant="secondary" routerLink="/profesor/rutinas">Rutinas asignadas</app-ui-button>
+  <app-ui-button variant="primary" routerLink="/profesor/publicaciones/nueva">
+    <i class="bi bi-plus-lg" aria-hidden="true"></i> Publicar rutina
+  </app-ui-button>
+</div>
+
+<form class="catalogo__filtros" (ngSubmit)="cargar()">
+  <div class="catalogo__busqueda">
+    <label class="catalogo__label" for="catalogo-buscar">Buscar por título</label>
+    <div class="catalogo__buscar">
+      <input id="catalogo-buscar" name="buscar" class="catalogo__input" type="search" [(ngModel)]="buscar" maxlength="80" placeholder="Ej: Preparación para tenis" />
+      <app-ui-button type="submit" variant="secondary">Buscar</app-ui-button>
+    </div>
+  </div>
+  <div>
+    <label class="catalogo__label" for="catalogo-disciplina">Disciplina</label>
+    <select id="catalogo-disciplina" name="disciplina" class="catalogo__input" [(ngModel)]="disciplina" (ngModelChange)="cargar()">
+      <option value="">Todas las disciplinas</option>
+      <option *ngFor="let d of disciplinas" [value]="d.value">{{ d.label }}</option>
+    </select>
+  </div>
+  <div>
+    <label class="catalogo__label" for="catalogo-nivel">Nivel</label>
+    <select id="catalogo-nivel" name="nivel" class="catalogo__input" [(ngModel)]="nivel" (ngModelChange)="cargar()">
+      <option value="">Todos los niveles</option>
+      <option *ngFor="let n of niveles" [value]="n.value">{{ n.label }}</option>
+    </select>
+  </div>
+</form>
+
+<p *ngIf="cargando" class="catalogo__estado" role="status">Cargando rutinas…</p>
+<p *ngIf="errorAccion" class="catalogo__error" role="alert">{{ errorAccion }}</p>
+<app-ui-empty-state *ngIf="!cargando && error" icon="bi-wifi-off" title="No pudimos cargar las rutinas" [message]="error">
+  <app-ui-button variant="secondary" (clicked)="cargar()">Reintentar</app-ui-button>
+</app-ui-empty-state>
+<app-ui-empty-state *ngIf="!cargando && !error && !rutinas.length" icon="bi-compass"
+  title="Sin rutinas para mostrar"
+  [message]="gestion ? 'Publica tu primer entrenamiento o prueba con otros filtros.' : 'Prueba con otros filtros. Aquí aparecerán los entrenamientos que publiquen tus profesores.'">
+</app-ui-empty-state>
+
+<div class="catalogo__lista">
+  <article *ngFor="let r of rutinas; trackBy: trackById" class="catalogo__card">
+    <a class="catalogo__enlace" [routerLink]="rutaDetalle(r)">
+      <div class="catalogo__etiquetas">
+        <app-ui-badge variant="primary">{{ etiquetaDisciplina(r.disciplina) }}</app-ui-badge>
+        <app-ui-badge>{{ etiquetaNivel(r.nivel) }}</app-ui-badge>
+      </div>
+      <h2>{{ r.titulo }}</h2>
+      <p class="catalogo__profesor"><i class="bi bi-person" aria-hidden="true"></i> {{ r.profesor_nombre }}</p>
+      <p>{{ r.objetivo }}</p>
+      <p class="catalogo__meta"><i class="bi bi-tools" aria-hidden="true"></i> {{ r.equipamiento }}</p>
+      <p class="catalogo__meta">{{ r.ejercicios.length }} ejercicios</p>
+      <span class="catalogo__ver">Ver entrenamiento <i class="bi bi-arrow-right" aria-hidden="true"></i></span>
+    </a>
+    <div *ngIf="gestion" class="catalogo__gestion">
+      <span class="catalogo__estado-publicacion">{{ r.activa ? 'Publicada' : 'Retirada de Explorar' }}</span>
+      <div class="catalogo__acciones">
+        <app-ui-button variant="secondary" [routerLink]="['/profesor/publicaciones', r.id, 'editar']">Editar</app-ui-button>
+        <app-ui-button variant="secondary" [disabled]="cambiandoId !== null" [loading]="cambiandoId === r.id" (clicked)="cambiarPublicacion(r)">
+          {{ r.activa ? 'Retirar' : 'Volver a publicar' }}
+        </app-ui-button>
+      </div>
+    </div>
+  </article>
+</div>
+<div *ngIf="hayMas && !error" class="catalogo__mas">
+  <app-ui-button variant="secondary" [loading]="cargando" [disabled]="cargando" (clicked)="cargar(true)">Cargar más</app-ui-button>
+</div>

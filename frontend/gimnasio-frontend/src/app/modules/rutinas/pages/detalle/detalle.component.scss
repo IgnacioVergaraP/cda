@@ -153,3 +153,10 @@
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+.rutina-detalle__autor { color: $color-text-muted; font-size: $fs-sm; margin-bottom: $space-3; }
+.rutina-detalle__acciones { margin: $space-4 0; }
+.rutina-detalle__acciones p { margin-top: $space-2; }
+.rutina-detalle__publicacion { padding: $space-4; margin-bottom: $space-4; background: $color-surface; border: 1px solid $color-border; border-radius: $radius-lg; }
+.rutina-detalle__publicacion p { margin: $space-2 0; overflow-wrap: anywhere; }
+.rutina-detalle__descripcion { white-space: pre-line; }
+.rutina-detalle__error { color: $color-danger; }

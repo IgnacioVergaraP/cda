@@ -39,3 +39,17 @@ class RutinasRepository(ABC):
     @abstractmethod
     def duplicar(self, rutina_id: str, profesor: dict, nuevo_alumno_id: str) -> Optional[Rutina]:
         ...
+
+    @abstractmethod
+    def listar_publicas(self, gimnasio_id: str, *, profesor_id: str | None = None,
+                        disciplina: str = "", nivel: str = "", buscar: str = "",
+                        desde: int = 0, limite: int = 24) -> List[Rutina]:
+        ...
+
+    @abstractmethod
+    def buscar_copia(self, alumno_id: str, origen_id: str) -> Optional[Rutina]:
+        ...
+
+    @abstractmethod
+    def actualizar_personal(self, rutina_id: str, alumno_id: str, data: dict) -> Optional[Rutina]:
+        ...

@@ -33,6 +33,11 @@ const routes: Routes = [
       import('./modules/rutinas/rutinas.module').then(m => m.RutinasModule),
   },
   {
+    path: 'explorar',
+    canActivate: [authGuard, roleGuard(['alumno'])],
+    loadChildren: () => import('./modules/explorar/explorar.module').then(m => m.ExplorarModule),
+  },
+  {
     path: 'progreso',
     canActivate: [authGuard],
     loadChildren: () =>

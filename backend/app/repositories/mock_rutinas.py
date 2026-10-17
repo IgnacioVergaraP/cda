@@ -148,7 +148,7 @@ class MockRutinasRepository(RutinasRepository):
     def listar_por_profesor(self, profesor_id: str, incluir_inactivas: bool = False) -> List[Rutina]:
         result = []
         for r in self._rutinas:
-            if r.profesor_id != profesor_id or r.creada_por_alumno:
+            if r.profesor_id != profesor_id or r.creada_por_alumno or r.es_publica or r.rutina_origen_id:
                 continue
             if not incluir_inactivas and not r.activa:
                 continue
@@ -164,13 +164,22 @@ class MockRutinasRepository(RutinasRepository):
     def crear(self, rutina: Rutina) -> Rutina:
         rutina.id = self._generar_id()
         rutina.fecha_creacion = _ahora_iso()
+        for i, ejercicio in enumerate(rutina.ejercicios):
+            if not ejercicio.id:
+                ejercicio.id = f"{rutina.id}-ej-{i + 1}"
         self._rutinas.append(rutina)
         return rutina
 
     def actualizar(self, rutina_id: str, profesor_id: str, data: dict) -> Optional[Rutina]:
         rutina = self.find_by_id(rutina_id)
-        if not rutina or rutina.profesor_id != profesor_id:
+        if not rutina or rutina.profesor_id != profesor_id or rutina.rutina_origen_id:
             return None
+        return self._actualizar_contenido(rutina, data)
+
+    def _actualizar_contenido(self, rutina: Rutina, data: dict) -> Rutina:
+        for campo in ("disciplina", "objetivo", "nivel", "equipamiento", "descripcion"):
+            if campo in data:
+                setattr(rutina, campo, data[campo])
         if "titulo" in data:
             rutina.titulo = data["titulo"]
         if "grupos_musculares" in data:
@@ -182,7 +191,7 @@ class MockRutinasRepository(RutinasRepository):
 
     def archivar(self, rutina_id: str, profesor_id: str) -> Optional[Rutina]:
         rutina = self.find_by_id(rutina_id)
-        if not rutina or rutina.profesor_id != profesor_id:
+        if not rutina or rutina.profesor_id != profesor_id or rutina.rutina_origen_id:
             return None
         rutina.activa = False
         rutina.fecha_modificacion = _ahora_iso()
@@ -190,7 +199,7 @@ class MockRutinasRepository(RutinasRepository):
 
     def reactivar(self, rutina_id: str, profesor_id: str) -> Optional[Rutina]:
         rutina = self.find_by_id(rutina_id)
-        if not rutina or rutina.profesor_id != profesor_id:
+        if not rutina or rutina.profesor_id != profesor_id or rutina.rutina_origen_id:
             return None
         rutina.activa = True
         rutina.fecha_modificacion = _ahora_iso()
@@ -224,3 +233,25 @@ class MockRutinasRepository(RutinasRepository):
             ],
         )
         return self.crear(nueva)
+
+    def listar_publicas(self, gimnasio_id: str, *, profesor_id: str | None = None,
+                        disciplina: str = "", nivel: str = "", buscar: str = "",
+                        desde: int = 0, limite: int = 24) -> List[Rutina]:
+        rows = [r for r in self._rutinas if r.es_publica and r.gimnasio_id == gimnasio_id
+                and (r.profesor_id == profesor_id if profesor_id else r.activa)
+                and (not disciplina or r.disciplina == disciplina)
+                and (not nivel or r.nivel == nivel)
+                and (not buscar or buscar.lower() in r.titulo.lower())]
+        rows.sort(key=lambda r: (r.fecha_creacion, r.id), reverse=True)
+        return rows[desde:desde + limite + 1]
+
+    def buscar_copia(self, alumno_id: str, origen_id: str) -> Optional[Rutina]:
+        return next((r for r in self._rutinas if r.alumno_id == alumno_id
+                     and r.rutina_origen_id == origen_id), None)
+
+    def actualizar_personal(self, rutina_id: str, alumno_id: str, data: dict) -> Optional[Rutina]:
+        rutina = self.find_by_id(rutina_id)
+        if (not rutina or rutina.alumno_id != alumno_id or rutina.es_publica
+                or not (rutina.creada_por_alumno or rutina.rutina_origen_id)):
+            return None
+        return self._actualizar_contenido(rutina, data)

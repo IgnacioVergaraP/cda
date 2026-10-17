@@ -175,3 +175,5 @@
 @keyframes rb-spin {
   to { transform: rotate(360deg); }
 }
+.rb__textarea { padding: $space-3; resize: vertical; }
+.rb__aviso { color: $color-text-muted; font-size: $fs-sm; margin-bottom: $space-4; }

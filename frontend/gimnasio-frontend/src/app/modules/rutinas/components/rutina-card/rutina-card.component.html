@@ -23,6 +23,8 @@
 
     <p *ngIf="rutina.creada_por_alumno" class="rutina-card__meta">Creada por ti</p>
 
+    <p *ngIf="rutina.rutina_origen_id" class="rutina-card__meta">Desde Explorar · {{ rutina.profesor_nombre }}</p>
+
     <p class="rutina-card__meta">
       {{ cantidadEjercicios }} ejercicio{{ cantidadEjercicios === 1 ? '' : 's' }}
     </p>

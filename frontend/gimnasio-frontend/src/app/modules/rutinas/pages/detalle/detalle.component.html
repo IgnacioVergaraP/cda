@@ -19,6 +19,27 @@
 
   <p *ngIf="rutina.creada_por_alumno">Rutina creada por ti</p>
 
+  <p *ngIf="rutina.profesor_nombre" class="rutina-detalle__autor">Por {{ rutina.profesor_nombre }}</p>
+  <p *ngIf="rutina.rutina_origen_id" class="rutina-detalle__autor">Guardada desde Explorar · Puedes adaptar tu copia personal.</p>
+  <section *ngIf="rutina.disciplina" class="rutina-detalle__publicacion">
+    <div class="rutina-detalle__tags">
+      <app-ui-badge variant="primary">{{ etiquetaDisciplina(rutina.disciplina) }}</app-ui-badge>
+      <app-ui-badge>{{ etiquetaNivel(rutina.nivel) }}</app-ui-badge>
+    </div>
+    <p><strong>Objetivo:</strong> {{ rutina.objetivo }}</p>
+    <p><strong>Equipamiento:</strong> {{ rutina.equipamiento }}</p>
+    <p *ngIf="rutina.descripcion" class="rutina-detalle__descripcion">{{ rutina.descripcion }}</p>
+  </section>
+  <div class="rutina-detalle__acciones">
+    <app-ui-button *ngIf="esPublica && !gestion" variant="primary" [block]="true" [loading]="guardando" [disabled]="guardando" (clicked)="guardarEnMisRutinas()">
+      {{ rutina.copia_id ? 'Ver en mis rutinas' : 'Agregar a mis rutinas' }}
+    </app-ui-button>
+    <p *ngIf="esPublica && !gestion" class="rutina-detalle__autor">Guarda una copia para adaptarla y registrar tu progreso.</p>
+    <p *ngIf="errorGuardar" class="rutina-detalle__error" role="alert">{{ errorGuardar }}</p>
+    <app-ui-button *ngIf="!esPublica && (rutina.creada_por_alumno || rutina.rutina_origen_id)" variant="secondary" [routerLink]="['/rutinas', rutina.id, 'editar']">Editar mi rutina</app-ui-button>
+    <app-ui-button *ngIf="gestion" variant="secondary" routerLink="/profesor/publicaciones">Volver a mis publicaciones</app-ui-button>
+  </div>
+
   <div class="rutina-detalle__tags">
     <app-ui-badge
       *ngFor="let g of rutina.grupos_musculares"
@@ -34,6 +55,7 @@
       <app-ejercicio-item
         *ngFor="let e of rutina.ejercicios; let i = index; trackBy: trackByEjercicio"
         [ejercicio]="e"
+        [permitirRegistro]="!esPublica"
         [indice]="i + 1"
         [routineMuscles]="rutina.grupos_musculares"
         (verDetalle)="abrirSheet($event)"
@@ -105,6 +127,7 @@
       <app-ui-button
         variant="primary"
         [block]="true"
+        *ngIf="!esPublica"
         (clicked)="registrarSeries()">
         <i class="bi bi-check2-square" aria-hidden="true"></i>
         Registrar series

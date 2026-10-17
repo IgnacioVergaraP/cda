@@ -13,7 +13,8 @@ from app.extensions import get_supabase
 
 _COLS_RUTINA = (
     "id,alumno_id,titulo,grupos_musculares,profesor_id,profesor_nombre,"
-    "activa,fecha_creacion,fecha_modificacion,gimnasio_id,creada_por_alumno"
+    "activa,fecha_creacion,fecha_modificacion,gimnasio_id,creada_por_alumno,es_publica,rutina_origen_id,"
+    "disciplina,objetivo,nivel,equipamiento,descripcion"
 )
 _COLS_EJERCICIO = (
     "id,rutina_id,posicion,tipo,maquina_id,nombre_libre,descripcion_libre,"
@@ -49,6 +50,11 @@ def _row_a_rutina(row: dict, ejercicios: List[Ejercicio]) -> Rutina:
         profesor_nombre=row.get("profesor_nombre"),
         activa=row.get("activa", True),
         creada_por_alumno=row.get("creada_por_alumno", False),
+        es_publica=row.get("es_publica", False),
+        rutina_origen_id=row.get("rutina_origen_id"),
+        disciplina=row.get("disciplina"), objetivo=row.get("objetivo"),
+        nivel=row.get("nivel"), equipamiento=row.get("equipamiento"),
+        descripcion=row.get("descripcion"),
         ejercicios=ejercicios,
         fecha_creacion=fecha_cre.isoformat() if hasattr(fecha_cre, "isoformat") else (fecha_cre or ""),
         fecha_modificacion=fecha_mod.isoformat() if hasattr(fecha_mod, "isoformat") else fecha_mod,
@@ -115,6 +121,8 @@ class SupabaseRutinasRepository(RutinasRepository):
             .select(_COLS_RUTINA)
             .eq("profesor_id", profesor_id)
             .eq("creada_por_alumno", False)
+            .eq("es_publica", False)
+            .is_("rutina_origen_id", "null")
             .order("fecha_creacion", desc=True)
         )
         if not incluir_inactivas:
@@ -147,6 +155,34 @@ class SupabaseRutinasRepository(RutinasRepository):
         ejercicios = _cargar_ejercicios_para_rutinas([rutina_id]).get(rutina_id, [])
         return _row_a_rutina(row, ejercicios)
 
+    def listar_publicas(self, gimnasio_id: str, *, profesor_id: str | None = None,
+                        disciplina: str = "", nivel: str = "", buscar: str = "",
+                        desde: int = 0, limite: int = 24) -> List[Rutina]:
+        query = (self._sb.table("rutinas").select(_COLS_RUTINA)
+                 .eq("gimnasio_id", gimnasio_id).eq("es_publica", True))
+        if profesor_id:
+            query = query.eq("profesor_id", profesor_id)
+        else:
+            query = query.eq("activa", True)
+        if disciplina:
+            query = query.eq("disciplina", disciplina)
+        if nivel:
+            query = query.eq("nivel", nivel)
+        if buscar:
+            literal = buscar.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            query = query.ilike("titulo", f"%{literal}%")
+        rows = (query.order("fecha_creacion", desc=True).order("id")
+                .range(desde, desde + limite).execute().data or [])
+        # One extra row tells the client whether another page exists.
+        ejercicios = _cargar_ejercicios_para_rutinas([r["id"] for r in rows])
+        return [_row_a_rutina(r, ejercicios.get(r["id"], [])) for r in rows]
+
+    def buscar_copia(self, alumno_id: str, origen_id: str) -> Optional[Rutina]:
+        rows = (self._sb.table("rutinas").select("id")
+                .eq("alumno_id", alumno_id).eq("rutina_origen_id", origen_id)
+                .limit(1).execute().data or [])
+        return self.find_by_id(rows[0]["id"]) if rows else None
+
     # -------- Escritura --------
 
     def crear(self, rutina: Rutina) -> Rutina:
@@ -158,6 +194,10 @@ class SupabaseRutinasRepository(RutinasRepository):
             "profesor_nombre": rutina.profesor_nombre,
             "activa": rutina.activa,
             "creada_por_alumno": rutina.creada_por_alumno,
+            "es_publica": rutina.es_publica,
+            "rutina_origen_id": rutina.rutina_origen_id,
+            **{campo: getattr(rutina, campo) for campo in
+               ("disciplina", "objetivo", "nivel", "equipamiento", "descripcion")},
             "gimnasio_id": rutina.gimnasio_id,
         }
         resp = self._sb.table("rutinas").insert(rutina_row).execute()
@@ -189,21 +229,35 @@ class SupabaseRutinasRepository(RutinasRepository):
         # Verificar que la rutina existe y es del profesor
         resp = (
             self._sb.table("rutinas")
-            .select("id,profesor_id")
+            .select("id,profesor_id,rutina_origen_id")
             .eq("id", rutina_id)
             .limit(1)
             .execute()
         )
         if not resp.data:
             return None
-        if resp.data[0]["profesor_id"] != profesor_id:
+        if resp.data[0]["profesor_id"] != profesor_id or resp.data[0].get("rutina_origen_id"):
             return None
 
+        return self._actualizar_contenido(rutina_id, data)
+
+    def actualizar_personal(self, rutina_id: str, alumno_id: str, data: dict) -> Optional[Rutina]:
+        rutina = self.find_by_id(rutina_id)
+        if (not rutina or rutina.alumno_id != alumno_id or rutina.es_publica
+                or not (rutina.creada_por_alumno or rutina.rutina_origen_id)):
+            return None
+        return self._actualizar_contenido(rutina_id, data)
+
+    def _actualizar_contenido(self, rutina_id: str, data: dict) -> Optional[Rutina]:
         update_rutina = {}
         if "titulo" in data:
             update_rutina["titulo"] = data["titulo"]
         if "grupos_musculares" in data:
             update_rutina["grupos_musculares"] = list(data["grupos_musculares"])
+
+        for campo in ("disciplina", "objetivo", "nivel", "equipamiento", "descripcion"):
+            if campo in data:
+                update_rutina[campo] = data[campo]
 
         if update_rutina:
             self._sb.table("rutinas").update(update_rutina).eq("id", rutina_id).execute()
@@ -234,12 +288,12 @@ class SupabaseRutinasRepository(RutinasRepository):
     def archivar(self, rutina_id: str, profesor_id: str) -> Optional[Rutina]:
         resp = (
             self._sb.table("rutinas")
-            .select("id,profesor_id")
+            .select("id,profesor_id,rutina_origen_id")
             .eq("id", rutina_id)
             .limit(1)
             .execute()
         )
-        if not resp.data or resp.data[0]["profesor_id"] != profesor_id:
+        if not resp.data or resp.data[0]["profesor_id"] != profesor_id or resp.data[0].get("rutina_origen_id"):
             return None
 
         self._sb.table("rutinas").update({"activa": False}).eq("id", rutina_id).execute()
@@ -248,12 +302,12 @@ class SupabaseRutinasRepository(RutinasRepository):
     def reactivar(self, rutina_id: str, profesor_id: str) -> Optional[Rutina]:
         resp = (
             self._sb.table("rutinas")
-            .select("id,profesor_id")
+            .select("id,profesor_id,rutina_origen_id")
             .eq("id", rutina_id)
             .limit(1)
             .execute()
         )
-        if not resp.data or resp.data[0]["profesor_id"] != profesor_id:
+        if not resp.data or resp.data[0]["profesor_id"] != profesor_id or resp.data[0].get("rutina_origen_id"):
             return None
 
         self._sb.table("rutinas").update({"activa": True}).eq("id", rutina_id).execute()

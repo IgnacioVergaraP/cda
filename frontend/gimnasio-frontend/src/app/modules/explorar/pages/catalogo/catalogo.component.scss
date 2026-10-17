@@ -1,0 +1,23 @@
+@import "tokens";
+
+.catalogo__acciones { display: flex; flex-wrap: wrap; gap: $space-2; margin-bottom: $space-4; }
+.catalogo__filtros { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: $space-3; margin-bottom: $space-5; }
+.catalogo__busqueda { grid-column: 1 / -1; }
+.catalogo__buscar { display: flex; gap: $space-2; align-items: center; }
+.catalogo__label { display: block; font-size: $fs-sm; color: $color-text-muted; margin-bottom: $space-2; }
+.catalogo__input { width: 100%; min-width: 0; min-height: 44px; padding: 10px; border: 1px solid $color-border; border-radius: 10px; background: $color-surface; color: $color-text; font: inherit; }
+.catalogo__input:focus-visible { outline: 2px solid $color-primary; outline-offset: 2px; }
+.catalogo__lista { display: grid; gap: $space-4; }
+.catalogo__card { background: $color-surface; border: 1px solid $color-border; border-radius: $radius-lg; overflow: hidden; }
+.catalogo__enlace { display: block; padding: $space-4; color: $color-text; text-decoration: none; }
+.catalogo__enlace:focus-visible { outline: 2px solid $color-primary; outline-offset: -3px; }
+.catalogo__enlace h2 { font-size: $fs-lg; margin: $space-3 0 $space-2; overflow-wrap: anywhere; }
+.catalogo__enlace p { margin-bottom: $space-2; overflow-wrap: anywhere; }
+.catalogo__etiquetas { display: flex; flex-wrap: wrap; gap: $space-2; }
+.catalogo__profesor, .catalogo__meta { color: $color-text-muted; font-size: $fs-sm; }
+.catalogo__ver { display: inline-flex; align-items: center; gap: $space-2; color: $color-primary; font-weight: $fw-semibold; margin-top: $space-2; }
+.catalogo__gestion { padding: $space-4; border-top: 1px solid $color-border; }
+.catalogo__gestion .catalogo__acciones { margin: $space-3 0 0; }
+.catalogo__estado-publicacion { color: $color-text-muted; font-size: $fs-sm; }
+.catalogo__estado, .catalogo__mas { text-align: center; padding: $space-4; }
+.catalogo__error { color: $color-danger; }

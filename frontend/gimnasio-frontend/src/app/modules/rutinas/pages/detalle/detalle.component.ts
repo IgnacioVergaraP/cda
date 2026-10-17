@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { finalize } from 'rxjs/operators';
 
+import { etiquetaDisciplina, etiquetaNivel } from '../../models/publicacion.model';
 import { Ejercicio, Rutina } from '../../models/rutina.model';
 import { RutinasService } from '../../services/rutinas.service';
 
@@ -14,6 +15,12 @@ import { RutinasService } from '../../services/rutinas.service';
 export class DetalleComponent implements OnInit {
 
   rutina: Rutina | null = null;
+  esPublica = false;
+  gestion = false;
+  guardando = false;
+  errorGuardar: string | null = null;
+  readonly etiquetaDisciplina = etiquetaDisciplina;
+  readonly etiquetaNivel = etiquetaNivel;
   cargando = false;
   errorMensaje: string | null = null;
 
@@ -30,6 +37,8 @@ export class DetalleComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.esPublica = this.route.snapshot.data['esPublica'] === true;
+    this.gestion = this.route.snapshot.data['gestion'] === true;
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.errorMensaje = 'Rutina no encontrada.';
@@ -108,7 +117,7 @@ export class DetalleComponent implements OnInit {
   }
 
   private iniciarRegistroSerie(ej: Ejercicio): void {
-    if (!this.rutina) return;
+    if (!this.rutina || this.esPublica) return;
     const esMaquina = ej.tipo === 'maquina';
 
     if (this.sheetVisible) this.cerrarSheet();
@@ -129,6 +138,21 @@ export class DetalleComponent implements OnInit {
     });
   }
 
+  guardarEnMisRutinas(): void {
+    if (!this.rutina || this.guardando || this.gestion) return;
+    if (this.rutina.copia_id) {
+      this.router.navigate(['/rutinas', this.rutina.copia_id]);
+      return;
+    }
+    this.guardando = true;
+    this.errorGuardar = null;
+    this.rutinasService.guardarPublica(this.rutina.id)
+      .pipe(finalize(() => (this.guardando = false))).subscribe({
+        next: copia => this.router.navigate(['/rutinas', copia.id]),
+        error: err => { this.errorGuardar = err?.error?.error?.message ?? 'No se pudo guardar la rutina.'; },
+      });
+  }
+
   trackByEjercicio(_: number, e: Ejercicio): string {
     return e.id;
   }
@@ -144,8 +168,9 @@ export class DetalleComponent implements OnInit {
     this.cargando = true;
     this.errorMensaje = null;
 
-    this.rutinasService
-      .obtenerDetalle(id)
+    const solicitud = this.esPublica
+      ? this.rutinasService.obtenerPublica(id, this.gestion) : this.rutinasService.obtenerDetalle(id);
+    solicitud
       .pipe(finalize(() => (this.cargando = false)))
       .subscribe({
         next: (r: Rutina) => (this.rutina = r),

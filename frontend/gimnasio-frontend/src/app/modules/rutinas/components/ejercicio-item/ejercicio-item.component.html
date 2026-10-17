@@ -39,6 +39,7 @@
 
   <button
     type="button"
+    *ngIf="permitirRegistro"
     class="ejercicio-item__register"
     [attr.aria-label]="'Registrar serie de ' + nombreVisible"
     title="Registrar una serie"

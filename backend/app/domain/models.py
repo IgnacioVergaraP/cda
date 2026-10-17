@@ -130,7 +130,7 @@ class Rutina:
     id: str
     titulo: str
     grupos_musculares: List[str]
-    alumno_id: str
+    alumno_id: Optional[str]
     gimnasio_id: str
     profesor_id: Optional[str] = None
     profesor_nombre: Optional[str] = None
@@ -139,6 +139,13 @@ class Rutina:
     fecha_creacion: str = ""
     fecha_modificacion: Optional[str] = None
     creada_por_alumno: bool = False
+    es_publica: bool = False
+    rutina_origen_id: Optional[str] = None
+    disciplina: Optional[str] = None
+    objetivo: Optional[str] = None
+    nivel: Optional[str] = None
+    equipamiento: Optional[str] = None
+    descripcion: Optional[str] = None
 
     def to_dict(self) -> dict:
         return {
@@ -150,6 +157,13 @@ class Rutina:
             "profesor_id": self.profesor_id,
             "profesor_nombre": self.profesor_nombre,
             "creada_por_alumno": self.creada_por_alumno,
+            "es_publica": self.es_publica,
+            "rutina_origen_id": self.rutina_origen_id,
+            "disciplina": self.disciplina,
+            "objetivo": self.objetivo,
+            "nivel": self.nivel,
+            "equipamiento": self.equipamiento,
+            "descripcion": self.descripcion,
             "activa": self.activa,
             "fecha_creacion": self.fecha_creacion,
             "fecha_modificacion": self.fecha_modificacion,

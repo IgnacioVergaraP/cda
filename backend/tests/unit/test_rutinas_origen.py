@@ -33,6 +33,7 @@ def test_listado_profesor_filtra_origen_en_base_de_datos():
     query = Mock()
     query.select.return_value = query
     query.eq.return_value = query
+    query.is_.return_value = query
     query.order.return_value = query
     query.execute.return_value.data = []
     repo._sb = Mock()
@@ -40,3 +41,5 @@ def test_listado_profesor_filtra_origen_en_base_de_datos():
     assert repo.listar_por_profesor("profesor", incluir_inactivas=True) == []
     query.eq.assert_any_call("profesor_id", "profesor")
     query.eq.assert_any_call("creada_por_alumno", False)
+    query.eq.assert_any_call("es_publica", False)
+    query.is_.assert_any_call("rutina_origen_id", "null")

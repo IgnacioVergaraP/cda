@@ -12,6 +12,7 @@ import {
   generarUid,
   pesoBuilderValido,
 } from '../../models/rutina-builder.model';
+import { DISCIPLINAS, NIVELES } from '../../../rutinas/models/publicacion.model';
 import { Rutina } from '../../../rutinas/models/rutina.model';
 import { AlumnoListItem } from '../../models/alumno.model';
 import { GRUPOS_MUSCULARES, etiquetaMusculo } from '../../../maquinas/models/maquina.model';
@@ -26,6 +27,14 @@ type Modo = 'nueva' | 'editar' | 'duplicar';
 export class RutinaBuilderComponent implements OnInit {
 
   esAlumno = false;
+  esPublica = false;
+  disciplina = 'musculacion';
+  nivel = 'principiante';
+  objetivo = '';
+  equipamiento = '';
+  descripcionPublica = '';
+  readonly disciplinas = DISCIPLINAS;
+  readonly niveles = NIVELES;
   modo: Modo = 'nueva';
   rutinaId: string | null = null;
 
@@ -53,7 +62,15 @@ export class RutinaBuilderComponent implements OnInit {
 
   ngOnInit(): void {
     this.esAlumno = this.route.snapshot.data['esAlumno'] === true;
+    this.esPublica = this.route.snapshot.data['esPublica'] === true;
     if (this.esAlumno) {
+      const id = this.route.snapshot.paramMap.get('id');
+      if (id) {
+        this.modo = 'editar';
+        this.rutinaId = id;
+        this.cargarRutina(id);
+        return;
+      }
       this.agregarEjercicioVacio();
       return;
     }
@@ -76,7 +93,7 @@ export class RutinaBuilderComponent implements OnInit {
 
     if (this.modo === 'nueva') {
       if (alumnoQuery) this.alumnoId = alumnoQuery;
-      this.cargarAlumnos();
+      if (!this.esPublica) this.cargarAlumnos();
       this.agregarEjercicioVacio();
     } else if (this.modo === 'editar' && this.rutinaId) {
       this.cargarRutina(this.rutinaId);
@@ -91,6 +108,7 @@ export class RutinaBuilderComponent implements OnInit {
   }
 
   get tituloPagina(): string {
+    if (this.esPublica) return this.modo === 'editar' ? 'Editar publicación' : 'Publicar rutina';
     if (this.modo === 'nueva') return 'Nueva rutina';
     if (this.modo === 'editar') return 'Editar rutina';
     return 'Duplicar rutina';
@@ -99,7 +117,8 @@ export class RutinaBuilderComponent implements OnInit {
   get puedeGuardar(): boolean {
     if (this.guardando) return false;
     if (this.titulo.trim().length < 3 || this.titulo.trim().length > 80) return false;
-    if (!this.esAlumno && this.modo !== 'editar' && !this.alumnoId) return false;
+    if (!this.esAlumno && !this.esPublica && this.modo !== 'editar' && !this.alumnoId) return false;
+    if (this.esPublica && (!this.objetivo.trim() || !this.equipamiento.trim())) return false;
     if (this.ejercicios.length === 0 || this.ejercicios.length > 30) return false;
 
     for (const e of this.ejercicios) {
@@ -204,17 +223,38 @@ export class RutinaBuilderComponent implements OnInit {
     }));
 
     if (this.esAlumno) {
-      this.rutinasService.crear({
+      const payload: EditarRutinaPayload = {
         titulo: this.titulo.trim(),
         grupos_musculares: this.gruposSeleccionados,
         ejercicios: ejerciciosPayload,
-      }).pipe(finalize(() => (this.guardando = false)))
+      };
+      const solicitud = this.rutinaId
+        ? this.rutinasService.editarPersonal(this.rutinaId, payload)
+        : this.rutinasService.crear(payload);
+      solicitud.pipe(finalize(() => (this.guardando = false)))
         .subscribe({
           next: (rutina) => this.router.navigate(['/rutinas', rutina.id]),
           error: (err: any) => {
             this.errorGuardar = err?.error?.error?.message ?? 'No se pudo crear la rutina.';
           },
         });
+      return;
+    }
+
+    if (this.esPublica) {
+      const payload = {
+        titulo: this.titulo.trim(), grupos_musculares: this.gruposSeleccionados,
+        ejercicios: ejerciciosPayload, disciplina: this.disciplina, nivel: this.nivel,
+        objetivo: this.objetivo.trim(), equipamiento: this.equipamiento.trim(),
+        descripcion: this.descripcionPublica.trim(),
+      };
+      const solicitud = this.rutinaId
+        ? this.rutinasService.editarPublica(this.rutinaId, payload)
+        : this.rutinasService.crearPublica(payload);
+      solicitud.pipe(finalize(() => (this.guardando = false))).subscribe({
+        next: () => this.volver(),
+        error: (err: any) => { this.errorGuardar = err?.error?.error?.message ?? 'No se pudo guardar la publicación.'; },
+      });
       return;
     }
 
@@ -258,7 +298,7 @@ export class RutinaBuilderComponent implements OnInit {
   }
 
   volver(): void {
-    this.router.navigate([this.esAlumno ? '/rutinas' : '/profesor/rutinas']);
+    this.router.navigate([this.esAlumno ? '/rutinas' : (this.esPublica ? '/profesor/publicaciones' : '/profesor/rutinas')]);
   }
 
   cancelar(): void {
@@ -280,11 +320,21 @@ export class RutinaBuilderComponent implements OnInit {
     this.cargando = true;
     this.errorMensaje = null;
 
-    this.profesorService
-      .obtenerRutina(id)
+    const solicitud = this.esAlumno ? this.rutinasService.obtenerDetalle(id)
+      : (this.esPublica ? this.rutinasService.obtenerPublica(id, true) : this.profesorService.obtenerRutina(id));
+    solicitud
       .pipe(finalize(() => (this.cargando = false)))
       .subscribe({
         next: (r: Rutina) => {
+          if (this.esAlumno && !r.creada_por_alumno && !r.rutina_origen_id) {
+            this.errorMensaje = 'Las rutinas asignadas se modifican con tu profesor.';
+            return;
+          }
+          this.disciplina = r.disciplina ?? 'musculacion';
+          this.nivel = r.nivel ?? 'principiante';
+          this.objetivo = r.objetivo ?? '';
+          this.equipamiento = r.equipamiento ?? '';
+          this.descripcionPublica = r.descripcion ?? '';
           this.titulo = r.titulo;
           this.gruposSeleccionados = [...r.grupos_musculares];
           this.alumnoId = r.alumno_id;

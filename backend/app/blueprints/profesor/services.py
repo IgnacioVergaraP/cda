@@ -291,7 +291,8 @@ def duplicar_rutina(profesor, rutina_id: str, nuevo_alumno_id: str) -> dict:
         raise AuthError(400, "InvalidAlumno", f"No existe un alumno con id '{nuevo_alumno_id}'.")
 
     original = _rutinas_repo.find_by_id(rutina_id)
-    if not original or original.gimnasio_id != profesor.gimnasio_id or original.creada_por_alumno:
+    if (not original or original.gimnasio_id != profesor.gimnasio_id or original.creada_por_alumno
+            or original.es_publica or original.rutina_origen_id):
         raise AuthError(404, "NotFound", f"No existe una rutina con id '{rutina_id}'.")
 
     nueva = _rutinas_repo.duplicar(

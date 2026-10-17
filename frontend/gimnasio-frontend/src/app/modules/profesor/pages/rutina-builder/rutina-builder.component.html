@@ -17,11 +17,11 @@
 
   <app-ui-page-header
     [title]="tituloPagina"
-    [subtitle]="esAlumno ? 'Crea tu propia rutina de entrenamiento' : (modo === 'editar' ? 'Modificá los datos de la rutina' : 'Armá la rutina para el alumno')">
+    [subtitle]="esPublica ? 'Comparte un entrenamiento con los alumnos de tu gimnasio' : esAlumno ? 'Crea o adapta tu rutina de entrenamiento' : (modo === 'editar' ? 'Modificá los datos de la rutina' : 'Armá la rutina para el alumno')">
   </app-ui-page-header>
 
   <!-- Selector de alumno -->
-  <div *ngIf="!esAlumno && modo === 'nueva'" class="rb__field">
+  <div *ngIf="!esAlumno && !esPublica && modo === 'nueva'" class="rb__field">
     <label class="rb__label" for="rb-alumno">Alumno destinatario</label>
 
     <div *ngIf="cargandoAlumnos" class="rb__loading-inline">
@@ -48,6 +48,34 @@
       [(ngModel)]="titulo"
       placeholder="Ej: Rutina de espalda y bíceps" />
   </div>
+
+  <ng-container *ngIf="esPublica">
+    <div class="rb__field">
+      <label class="rb__label" for="rb-disciplina">Disciplina</label>
+      <select id="rb-disciplina" class="rb__select" [(ngModel)]="disciplina">
+        <option *ngFor="let d of disciplinas" [value]="d.value">{{ d.label }}</option>
+      </select>
+    </div>
+    <div class="rb__field">
+      <label class="rb__label" for="rb-nivel">Nivel</label>
+      <select id="rb-nivel" class="rb__select" [(ngModel)]="nivel">
+        <option *ngFor="let n of niveles" [value]="n.value">{{ n.label }}</option>
+      </select>
+    </div>
+    <div class="rb__field">
+      <label class="rb__label" for="rb-objetivo">Objetivo</label>
+      <input id="rb-objetivo" class="rb__input" [(ngModel)]="objetivo" maxlength="120" placeholder="Ej: Mejorar la fuerza para tenis" />
+    </div>
+    <div class="rb__field">
+      <label class="rb__label" for="rb-equipamiento">Equipamiento necesario</label>
+      <input id="rb-equipamiento" class="rb__input" [(ngModel)]="equipamiento" maxlength="250" placeholder="Ej: Sin equipamiento, bandas o mancuernas" />
+    </div>
+    <div class="rb__field">
+      <label class="rb__label" for="rb-descripcion">Descripción (opcional)</label>
+      <textarea id="rb-descripcion" class="rb__input rb__textarea" [(ngModel)]="descripcionPublica" maxlength="1000" rows="3" placeholder="Cómo realizar este entrenamiento y para quién está pensado"></textarea>
+    </div>
+    <p class="rb__aviso">Los alumnos podrán guardar una copia personal. Los cambios en esta publicación no modificarán sus copias.</p>
+  </ng-container>
 
   <!-- Grupos musculares -->
   <div class="rb__field">
@@ -120,7 +148,7 @@
       [loading]="guardando"
       [disabled]="!puedeGuardar"
       (clicked)="guardar()">
-      Guardar rutina
+      {{ esPublica ? (modo === 'editar' ? 'Guardar publicación' : 'Publicar rutina') : 'Guardar rutina' }}
     </app-ui-button>
   </div>
 

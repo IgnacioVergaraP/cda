@@ -10,6 +10,7 @@ import { RutinaBuilderComponent } from '../profesor/pages/rutina-builder/rutina-
 const routes: Routes = [
   { path: '', component: ListaComponent },
   { path: 'nueva', component: RutinaBuilderComponent, canActivate: [roleGuard(['alumno'])], data: { esAlumno: true } },
+  { path: ':id/editar', component: RutinaBuilderComponent, canActivate: [roleGuard(['alumno'])], data: { esAlumno: true } },
   { path: ':id', component: DetalleComponent },
 ];
 

@@ -10,6 +10,7 @@ export class EjercicioItemComponent {
 
   @Input() ejercicio!: Ejercicio;
   @Input() indice = 1;
+  @Input() permitirRegistro = true;
   @Input() routineMuscles: string[] = [];
 
   get muscles(): string[] {
