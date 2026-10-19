@@ -68,7 +68,9 @@ def crear_serie(alumno_id: str, gimnasio_id: str, payload: dict) -> dict:
         if payload["modalidad"] != modalidad:
             raise AuthError(400, "InvalidEjercicio", "El tipo de registro no coincide con el ejercicio.")
         disponibles = {r["id"]: r for r in elegido["recursos"]}
-        ids = payload["recurso_ids"]
+        ids = payload.get("recurso_ids", list(disponibles))
+        if not 1 <= len(ids) <= 30:
+            raise AuthError(400, "InvalidRecurso", "El ejercicio debe tener recursos asociados para registrar su uso.")
         if not set(ids) <= disponibles.keys():
             raise AuthError(400, "InvalidRecurso", "Selecciona recursos asociados al ejercicio de tu gimnasio.")
         recursos = [disponibles[id] for id in ids]

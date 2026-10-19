@@ -1,0 +1,54 @@
+<div class="app-shell" [class.app-shell--auth]="esAuth$ | async" [class.app-shell--with-sidebar]="mostrarSidebar$ | async">
+
+  <app-admin-sidebar *ngIf="mostrarSidebar$ | async"></app-admin-sidebar>
+
+  <div class="app-main">
+
+    <div class="app-gym-brand" *ngIf="!(esAuth$ | async) && (gimnasioConfig$ | async) as gym">
+      <img *ngIf="gym.logo_url; else gymFallback" [src]="gym.logo_url" alt="">
+      <ng-template #gymFallback>
+        <span class="app-gym-brand__mark" aria-hidden="true">
+          <i class="bi bi-building"></i>
+        </span>
+      </ng-template>
+      <span class="app-gym-brand__name">{{ gym.nombre }}</span>
+    </div>
+
+    <!-- Banner: Estás en modo admin (admin viendo /admin en mobile) -->
+    <div *ngIf="mostrarBannerAdmin$ | async" class="app-banner-modo app-banner-modo--admin">
+      <div class="app-banner-modo__info">
+        <i class="bi bi-shield-check" aria-hidden="true"></i>
+        <span>Estás en <strong>modo admin</strong></span>
+      </div>
+      <button
+        type="button"
+        class="app-banner-modo__btn"
+        (click)="irAModoProfesor()">
+        <i class="bi bi-arrow-left-right" aria-hidden="true"></i>
+        Ir a modo profesor
+      </button>
+    </div>
+
+    <!-- Banner: Estás en modo profesor (admin viendo /profesor) -->
+    <div *ngIf="mostrarBannerProfesor$ | async" class="app-banner-modo app-banner-modo--profesor">
+      <div class="app-banner-modo__info">
+        <i class="bi bi-info-circle" aria-hidden="true"></i>
+        <span>Estás en <strong>modo profesor</strong></span>
+      </div>
+      <button
+        type="button"
+        class="app-banner-modo__btn"
+        (click)="irAModoAdmin()">
+        <i class="bi bi-arrow-left-right" aria-hidden="true"></i>
+        Volver a admin
+      </button>
+    </div>
+
+    <main class="app-content" [class.app-content--dashboard]="esDashboard">
+      <router-outlet></router-outlet>
+    </main>
+
+    <app-bottom-nav *ngIf="(mostrarBottomNav$ | async) && !(mostrarSidebar$ | async)"></app-bottom-nav>
+  </div>
+
+</div>

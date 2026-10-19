@@ -1,7 +1,7 @@
 """Catálogo de ejercicios y recursos, independiente de rutinas y progreso."""
 from app.extensions import get_supabase
 
-_COLS_RECURSO = "id,nombre,tipo,numero_maquina,descripcion,gimnasio_id,maquina_origen_id"
+_COLS_RECURSO = "id,nombre,tipo,numero_maquina,descripcion,gimnasio_id,maquina_origen_id,es_cardio"
 _COLS_EJERCICIO = (
     "id,nombre,categoria,grupos_musculares,descripcion,video_url,imagen_url,gimnasio_id,maquina_origen_id,"
     f"vinculos:ejercicio_recursos(recurso:recursos_gimnasio({_COLS_RECURSO}))"
@@ -42,10 +42,12 @@ class SupabaseCatalogoRepository:
                 .eq("gimnasio_id", gimnasio_id).in_("id", list(ids)).execute().data or [])
         return [_ejercicio(r) for r in rows]
 
-    def listar_recursos(self, gimnasio_id, tipo="", buscar="", desde=0):
+    def listar_recursos(self, gimnasio_id, tipo="", buscar="", desde=0, es_cardio=None):
         query = self._sb.table("recursos_gimnasio").select(_COLS_RECURSO).eq("gimnasio_id", gimnasio_id)
         if tipo:
             query = query.eq("tipo", tipo)
+        if es_cardio is not None:
+            query = query.eq("es_cardio", es_cardio)
         if buscar:
             # PostgREST OR: escape grammar characters as well as ILIKE wildcards.
             patron = self._patron(buscar).replace("\\", "\\\\").replace('"', '\\"')

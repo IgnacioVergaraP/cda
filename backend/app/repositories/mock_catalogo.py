@@ -56,10 +56,11 @@ class MockCatalogoRepository:
         return [self._resolver(e) for e in self.ejercicios.values()
                 if e["id"] in ids and e["gimnasio_id"] == gimnasio_id]
 
-    def listar_recursos(self, gimnasio_id, tipo="", buscar="", desde=0):
+    def listar_recursos(self, gimnasio_id, tipo="", buscar="", desde=0, es_cardio=None):
         self._sincronizar()
         rows = [deepcopy(r) for r in self.recursos.values() if r["gimnasio_id"] == gimnasio_id
                 and (not tipo or r["tipo"] == tipo)
+                and (es_cardio is None or r.get("es_cardio", False) == es_cardio)
                 and (not buscar or buscar.lower() in r["nombre"].lower() or buscar.lower() in (r["numero_maquina"] or "").lower())]
         rows.sort(key=lambda r: (r["nombre"], r["id"]))
         return rows[desde:desde + 25]

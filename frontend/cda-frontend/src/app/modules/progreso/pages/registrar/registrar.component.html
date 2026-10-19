@@ -1,0 +1,29 @@
+<header class="registrar__header">
+  <button type="button" class="registrar__back" aria-label="Volver" (click)="cancelar()"><i class="bi bi-arrow-left" aria-hidden="true"></i></button>
+  <div class="registrar__header-titles"><h1 class="registrar__titulo">{{ nombreVisible || 'Registrar entrenamiento' }}</h1><p class="registrar__indicador">{{ indicadorSerie }}</p></div>
+  <span class="registrar__header-spacer" aria-hidden="true"></span>
+</header>
+<div class="registrar__body">
+  <p *ngIf="cargando" role="status">Cargando ejercicio…</p>
+  <app-metricas-registro [conSteppers]="true" *ngIf="!cargando && (!catalogoId || ejercicio)" [(valor)]="metricas"></app-metricas-registro>
+  <div *ngIf="errorMensaje" class="registrar__error" role="alert">{{ errorMensaje }}</div>
+  <app-ui-button *ngIf="catalogoId && !cargando && !ejercicio" variant="secondary" (clicked)="cargarEjercicio()">Reintentar</app-ui-button>
+  <div *ngIf="exitoMensaje" class="registrar__exito" role="status">{{ exitoMensaje }}</div>
+  <app-ui-button variant="primary" [block]="true" [loading]="guardando" [disabled]="!puedeRegistrar" (clicked)="registrarSerie()">{{ esCardio ? 'Registrar cardio' : 'Registrar serie' }}</app-ui-button>
+  <section *ngIf="series.length" class="registrar__series">
+    <h2 class="registrar__series-titulo">Registros guardados ({{ series.length }})</h2>
+    <ul class="registrar__series-lista"><li *ngFor="let s of series; trackBy: trackBySerie" class="registrar__serie">
+      <i class="bi bi-check-circle-fill registrar__serie-icon" aria-hidden="true"></i><span class="registrar__serie-num">#{{ s.numero_serie }}</span>
+      <span class="registrar__serie-resumen">{{ resumenRegistro(s) }}</span>
+      <button type="button" class="registrar__serie-editar" aria-label="Editar registro" (click)="abrirEdicion(s)"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+    </li></ul>
+  </section>
+  <div class="registrar__footer"><app-ui-button variant="secondary" [block]="true" (clicked)="terminar()">{{ series.length ? 'Terminar sesión' : 'Cancelar' }}</app-ui-button></div>
+</div>
+<app-ui-sheet [visible]="edicionVisible" title="Editar registro" (closed)="cerrarEdicion()">
+  <ng-container *ngIf="serieEnEdicion">
+    <app-metricas-registro [conSteppers]="true" [(valor)]="metricasEdicion"></app-metricas-registro>
+    <p *ngIf="errorEdicion" class="registrar__error" role="alert">{{ errorEdicion }}</p>
+    <div class="registrar__edicion-actions"><app-ui-button variant="primary" [block]="true" [loading]="guardandoEdicion" [disabled]="!metricasValidas(metricasEdicion) || guardandoEdicion" (clicked)="guardarEdicion()">Guardar cambios</app-ui-button></div>
+  </ng-container>
+</app-ui-sheet>

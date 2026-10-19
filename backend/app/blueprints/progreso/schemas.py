@@ -29,6 +29,9 @@ def validar_crear_serie_payload(data: dict) -> dict:
             out.update(ejercicio_tipo=tipo, maquina_id=valor.strip() if tipo == "maquina" else None,
                        nombre_libre=valor.strip() if tipo == "libre" else None)
             return out
+        if "recurso_ids" not in data:
+            # El servidor resuelve los recursos del ejercicio; el alumno no tiene que elegirlos.
+            return out
         if not isinstance(ids, list) or not 1 <= len(ids) <= 30:
             raise AuthError(400, "InvalidPayload", "Selecciona entre 1 y 30 recursos utilizados.")
         out["recurso_ids"] = [_uuid(id, "recurso_ids") for id in ids]

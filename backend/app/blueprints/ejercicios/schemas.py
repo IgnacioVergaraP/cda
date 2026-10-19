@@ -36,7 +36,12 @@ def filtros(args, recursos=False):
         raise AuthError(400, "InvalidFilter", "La página no es válida.")
     if desde < 0 or desde > 100000:
         raise AuthError(400, "InvalidFilter", "La página no es válida.")
-    return {campo: valor, "buscar": buscar, "desde": desde, **({} if recursos else {"musculo": musculo})}
+    extras = {"musculo": musculo} if not recursos else {}
+    if recursos and "es_cardio" in args:
+        if args["es_cardio"] not in ("true", "false"):
+            raise AuthError(400, "InvalidFilter", "'es_cardio' debe ser true o false.")
+        extras["es_cardio"] = args["es_cardio"] == "true"
+    return {campo: valor, "buscar": buscar, "desde": desde, **extras}
 
 
 def recurso(data):
@@ -45,13 +50,16 @@ def recurso(data):
     tipo = data.get("tipo")
     if not isinstance(tipo, str) or tipo not in TIPOS_RECURSO:
         raise AuthError(400, "InvalidPayload", "El tipo de recurso no es válido.")
+    es_cardio = data.get("es_cardio", False)
+    if not isinstance(es_cardio, bool) or (es_cardio and tipo != "maquina"):
+        raise AuthError(400, "InvalidPayload", "Solo una máquina puede marcarse como equipo de cardio.")
     numero = data.get("numero_maquina")
     if numero is not None:
         if not isinstance(numero, str) or len(numero.strip()) > 30:
             raise AuthError(400, "InvalidPayload", "El número debe ser texto de hasta 30 caracteres.")
         numero = numero.strip() or None
     return {"nombre": _texto(data, "nombre", 100, True), "tipo": tipo,
-            "numero_maquina": numero, "descripcion": _texto(data, "descripcion", 1000)}
+            "numero_maquina": numero, "descripcion": _texto(data, "descripcion", 1000), "es_cardio": es_cardio}
 
 
 def ejercicio(data):

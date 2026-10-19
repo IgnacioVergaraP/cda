@@ -1,0 +1,125 @@
+@import "tokens";
+
+.app-shell {
+  width: 100%;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-shell--with-sidebar {
+  flex-direction: row;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
+}
+
+// -------- Banners de modo --------
+
+.app-banner-modo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-3;
+
+  padding: $space-2 max(#{$space-4}, #{$safe-area-left}) $space-2 max(#{$space-4}, #{$safe-area-right});
+
+  border-bottom: 1px solid transparent;
+}
+
+// Variante: modo profesor (naranja / warning)
+.app-banner-modo--profesor {
+  background: rgba(183, 121, 31, 0.10);
+  border-bottom-color: rgba(183, 121, 31, 0.25);
+
+  .app-banner-modo__info i { color: $color-warning; }
+
+  .app-banner-modo__btn {
+    color: $color-warning;
+    border-color: rgba(183, 121, 31, 0.35);
+
+    @include hover {
+      background: rgba(183, 121, 31, 0.08);
+      border-color: rgba(183, 121, 31, 0.55);
+    }
+  }
+}
+
+// Variante: modo admin (verde / primary)
+.app-banner-modo--admin {
+  background: rgba(var(--brand-rgb), 0.08);
+  border-bottom-color: rgba(var(--brand-rgb), 0.22);
+
+  .app-banner-modo__info i { color: $color-primary; }
+
+  .app-banner-modo__btn {
+    color: $color-primary;
+    border-color: rgba(var(--brand-rgb), 0.30);
+
+    @include hover {
+      background: rgba(var(--brand-rgb), 0.10);
+      border-color: rgba(var(--brand-rgb), 0.50);
+    }
+  }
+}
+
+.app-banner-modo__info {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  font-size: $fs-xs;
+  color: $color-text;
+
+  i { font-size: 14px; }
+
+  strong { font-weight: $fw-semibold; }
+}
+
+.app-banner-modo__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 12px;
+  font-size: $fs-xs;
+  font-weight: $fw-medium;
+  background: #ffffff;
+  border: 1px solid;
+  border-radius: $radius-full;
+  cursor: pointer;
+
+  transition: background 150ms ease, border-color 150ms ease;
+
+  &:active { transform: scale(0.98); }
+
+  i { font-size: 13px; }
+}
+
+// -------- Contenido --------
+
+.app-content {
+  flex: 1 0 auto;
+  min-width: 0;
+  width: 100%;
+  max-width: $content-max-width;
+  margin: 0 auto;
+  padding: $space-6 max(#{$space-4}, #{$safe-area-right}) $space-4 max(#{$space-4}, #{$safe-area-left});
+  padding-bottom: calc(#{$bottom-nav-height} + #{$safe-area-bottom} + #{$space-4});
+}
+
+.app-shell--with-sidebar .app-content {
+  max-width: $content-max-width;
+  padding-bottom: $space-6;
+}
+.app-shell--auth {
+  background: #15191c;
+  .app-content { max-width: none; padding: 0; }
+}
+
+.app-shell--with-sidebar .app-content--dashboard { max-width: 1440px; }

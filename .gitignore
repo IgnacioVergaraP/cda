@@ -42,3 +42,7 @@ yarn-error.log*
 # Logs
 *.log
 logs/
+
+# Configuración pública generada en cada build
+frontend/cda-frontend/src/environments/client-config.generated.ts
+.vercel/
