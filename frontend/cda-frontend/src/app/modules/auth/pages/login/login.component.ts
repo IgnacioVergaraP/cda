@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, Inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
@@ -10,7 +11,7 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit, OnDestroy {
 
   form: FormGroup;
   enviando = false;
@@ -21,11 +22,24 @@ export class LoginComponent {
     private auth: AuthService,
     private router: Router,
     private route: ActivatedRoute,
+    @Inject(DOCUMENT) private document: Document,
+    private renderer: Renderer2,
   ) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(4)]],
     });
+  }
+
+  ngOnInit(): void {
+    // El rebote del scroll puede revelar el fondo del documento en móvil.
+    this.renderer.addClass(this.document.documentElement, 'auth-page');
+    this.renderer.addClass(this.document.body, 'auth-page');
+  }
+
+  ngOnDestroy(): void {
+    this.renderer.removeClass(this.document.documentElement, 'auth-page');
+    this.renderer.removeClass(this.document.body, 'auth-page');
   }
 
   get emailCtrl() { return this.form.get('email')!; }

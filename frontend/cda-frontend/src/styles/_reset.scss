@@ -21,6 +21,14 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
+// El login también cubre el lienzo del navegador y las áreas de rebote.
+// La clase se retira al salir para recuperar el fondo claro de la aplicación.
+html.auth-page,
+body.auth-page {
+  background: $color-bg-dark;
+  overscroll-behavior-y: none;
+}
+
 button {
   font: inherit;
   color: inherit;
