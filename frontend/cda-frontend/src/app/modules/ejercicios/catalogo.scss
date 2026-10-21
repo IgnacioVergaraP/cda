@@ -4,7 +4,7 @@
 .catalogo__acciones--fila app-ui-button { min-width: 0; }
 .catalogo__categorias { display: flex; gap: $space-2; overflow-x: auto; padding-bottom: $space-2; margin-bottom: $space-3; }
 .catalogo__chip { flex: 0 0 auto; min-height: 40px; padding: 8px 14px; border: 1px solid $color-border; border-radius: $radius-full; background: $color-surface; color: $color-text-muted; font: inherit; font-size: $fs-sm; cursor: pointer; }
-.catalogo__chip--activo { background: $color-primary-soft; color: $color-primary; border-color: $color-primary; }
+.catalogo__chip--activo { background: $color-primary-soft; color: $color-primary-ink; border-color: $color-primary; }
 .catalogo__filtros, .catalogo__form { display: flex; flex-direction: column; gap: $space-2; margin-bottom: $space-5; }
 .catalogo__form { gap: $space-3; }
 .catalogo__form label, .catalogo__filtros label { color: $color-text-muted; font-size: $fs-sm; }
@@ -26,9 +26,9 @@ textarea.catalogo__input { resize: vertical; }
 .catalogo__card h3 { font-size: $fs-base; margin: 0; overflow-wrap: anywhere; }
 .catalogo__etiquetas { display: flex; gap: $space-2; flex-wrap: wrap; margin-bottom: $space-3; }
 .catalogo__recurso, .catalogo__meta { color: $color-text-muted; font-size: $fs-sm; margin: $space-2 0; overflow-wrap: anywhere; }
-.catalogo__recurso strong { color: $color-primary; }
-.catalogo__ver { display: flex; gap: $space-2; align-items: center; color: $color-primary; margin-top: $space-3; font-size: $fs-sm; font-weight: $fw-semibold; }
-.catalogo__vista-previa { display: block; padding: $space-3 $space-4; border-top: 1px solid $color-border; color: $color-primary; font-size: $fs-sm; }
+.catalogo__recurso strong { color: $color-primary-ink; }
+.catalogo__ver { display: flex; gap: $space-2; align-items: center; color: $color-primary-ink; margin-top: $space-3; font-size: $fs-sm; font-weight: $fw-semibold; }
+.catalogo__vista-previa { display: block; padding: $space-3 $space-4; border-top: 1px solid $color-border; color: $color-primary-ink; font-size: $fs-sm; }
 .catalogo__mas, .catalogo__estado { text-align: center; padding: $space-4; }
 .catalogo__seccion { margin: $space-5 0; }
 .catalogo__descripcion { white-space: pre-line; overflow-wrap: anywhere; }

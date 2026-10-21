@@ -45,7 +45,7 @@
   height: 40px;
   border-radius: 50%;
   background: $color-primary;
-  color: $color-text-inverse;
+  color: $color-text;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -131,4 +131,15 @@
   color: $color-text;
   font-weight: $fw-semibold;
   box-shadow: $shadow-xs;
+}
+.as__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: $color-text-inverse;
+  font-family: $font-family-display;
+  font-size: $fs-lg;
+  padding-bottom: $space-4;
+  border-bottom: 2px solid $color-primary;
+  img { object-fit: contain; flex-shrink: 0; }
 }

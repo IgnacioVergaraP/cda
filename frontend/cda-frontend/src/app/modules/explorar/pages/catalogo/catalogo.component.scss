@@ -23,7 +23,7 @@
 .catalogo__enlace p { margin-bottom: $space-2; overflow-wrap: anywhere; }
 .catalogo__etiquetas { display: flex; flex-wrap: wrap; gap: $space-2; }
 .catalogo__profesor, .catalogo__meta { color: $color-text-muted; font-size: $fs-sm; }
-.catalogo__ver { display: inline-flex; align-items: center; gap: $space-2; color: $color-primary; font-weight: $fw-semibold; margin-top: $space-2; }
+.catalogo__ver { display: inline-flex; align-items: center; gap: $space-2; color: $color-primary-ink; font-weight: $fw-semibold; margin-top: $space-2; }
 .catalogo__gestion { padding: $space-4; border-top: 1px solid $color-border; }
 .catalogo__gestion .catalogo__acciones { margin: $space-3 0 0; }
 .catalogo__estado-publicacion { color: $color-text-muted; font-size: $fs-sm; }

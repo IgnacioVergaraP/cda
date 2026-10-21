@@ -67,7 +67,7 @@
   align-items: center;
   gap: 6px;
   font-size: $fs-xs;
-  color: $color-primary;
+  color: $color-primary-ink;
   font-weight: $fw-medium;
 
   i { font-size: 13px; }
@@ -96,7 +96,7 @@
   background: rgba(var(--brand-rgb), 0.06);
   border: 1px solid rgba(var(--brand-rgb), 0.18);
   font-size: $fs-sm;
-  color: $color-primary;
+  color: $color-primary-ink;
   line-height: 1.4;
 
   i { font-size: 14px; margin-top: 1px; }

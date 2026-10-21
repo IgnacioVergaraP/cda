@@ -16,7 +16,7 @@
   --color-primary: #{$color-primary-default};
   --color-primary-hover: #{$color-primary-hover-default};
   --color-primary-soft: #{$color-primary-soft-default};
-  --brand-rgb: 255, 107, 0;
+  --brand-rgb: 255, 210, 0;
   --safe-area-top: #{$safe-area-top};
   --safe-area-right: #{$safe-area-right};
   --safe-area-bottom: #{$safe-area-bottom};
@@ -27,11 +27,11 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 44px;
+  min-height: 58px;
   padding: 7px max(#{$space-4}, #{$safe-area-left}) 7px max(#{$space-4}, #{$safe-area-right});
   padding-top: calc(7px + #{$safe-area-top});
   background: $color-bg-dark;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 2px solid $color-primary;
 }
 
 .app-gym-brand {
@@ -63,9 +63,9 @@
 
 .app-gym-brand img,
 .app-gym-brand__mark {
-  width: 28px;
-  height: 28px;
-  flex: 0 0 28px;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
   border-radius: $radius-sm;
 }
 
@@ -75,7 +75,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: $color-primary;
+  color: $color-primary-ink;
   background: $color-primary-soft;
   font-size: 15px;
 }

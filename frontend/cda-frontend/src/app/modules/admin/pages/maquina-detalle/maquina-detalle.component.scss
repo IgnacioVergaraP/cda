@@ -76,7 +76,7 @@
   border-radius: 50%;
 
   background: $color-primary;
-  color: $color-text-inverse;
+  color: $color-text;
   border: 0;
   cursor: pointer;
 
@@ -146,7 +146,7 @@
 .md__tipo--active {
   background: $color-primary-soft;
   border-color: rgba(var(--brand-rgb), 0.30);
-  color: $color-primary;
+  color: $color-primary-ink;
   font-weight: $fw-semibold;
 }
 
@@ -276,7 +276,7 @@
   font-size: $fs-sm;
   font-weight: $fw-medium;
 
-  color: $color-primary;
+  color: $color-primary-ink;
   background: $color-primary-soft;
   border: 1px solid rgba(var(--brand-rgb), 0.20);
   border-radius: $radius-md;

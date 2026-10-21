@@ -14,7 +14,7 @@
   border-radius: 10px;
   border: 1px solid rgba(var(--brand-rgb), 0.20);
   background: rgba(var(--brand-rgb), 0.06);
-  color: $color-primary;
+  color: $color-primary-ink;
   font-size: $fs-sm;
 
   i { font-size: 15px; }
@@ -154,7 +154,7 @@
   border: 1px solid rgba(var(--brand-rgb), 0.30);
   border-radius: $radius-md;
 
-  i { color: $color-primary; font-size: 15px; flex-shrink: 0; }
+  i { color: $color-primary-ink; font-size: 15px; flex-shrink: 0; }
 }
 
 .rep__maquina-seleccionada-nombre {
@@ -222,7 +222,7 @@
   border: 1px solid $color-border;
   border-radius: $radius-md;
 
-  i { color: $color-primary; font-size: 16px; }
+  i { color: $color-primary-ink; font-size: 16px; }
   span { flex: 1; font-size: $fs-sm; color: $color-text; }
 }
 

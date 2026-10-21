@@ -74,7 +74,7 @@
 }
 
 .ui-input__wrap:focus-within .ui-input__icon {
-  color: $color-primary;
+  color: $color-primary-ink;
 }
 
 .ui-input__action {
@@ -123,22 +123,22 @@
   .ui-input__label { color: #ffffff; font-size: 14px; }
   .ui-input__field {
     min-height: 54px;
-    background: #20262b;
-    border-color: #3d464d;
+    background: #242427;
+    border-color: #45454c;
     border-radius: 12px;
     color: #ffffff;
     &::placeholder { color: #9ba3aa; }
     &:hover:not(:disabled) { border-color: #6b747c; }
-    &:focus { border-color: #ff6b00; background: #20262b; box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.15); }
+    &:focus { border-color: $color-primary; background: #242427; box-shadow: 0 0 0 3px rgba(255, 210, 0, 0.15); }
   }
   .ui-input__icon, .ui-input__action { color: #a4a9ae; }
-  .ui-input__wrap:focus-within .ui-input__icon { color: #ff6b00; }
+  .ui-input__wrap:focus-within .ui-input__icon { color: $color-primary; }
   .ui-input__action {
     width: 48px;
     height: 48px;
     right: 3px;
-    &:hover { color: #ffffff; background: #2c343a; }
-    &:focus-visible { outline-color: #ff6b00; }
+    &:hover { color: #ffffff; background: #303036; }
+    &:focus-visible { outline-color: $color-primary; }
   }
   .ui-input__field--with-action { padding-right: 56px; }
   .ui-input__error { color: #ffb4ab; }

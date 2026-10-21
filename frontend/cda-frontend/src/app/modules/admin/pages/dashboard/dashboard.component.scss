@@ -30,7 +30,7 @@
 .dash__chip--active {
   background: $color-primary-soft;
   border-color: rgba(var(--brand-rgb), 0.30);
-  color: $color-primary;
+  color: $color-primary-ink;
   font-weight: $fw-semibold;
 }
 
@@ -66,7 +66,7 @@
 
 .dash__stat-icon {
   font-size: 18px;
-  color: $color-primary;
+  color: $color-primary-ink;
   margin-bottom: $space-1;
 }
 
@@ -104,7 +104,7 @@
   color: $color-text;
   margin: 0 0 $space-3;
 
-  i { font-size: 16px; color: $color-primary; }
+  i { font-size: 16px; color: $color-primary-ink; }
 }
 
 .dash__lista {

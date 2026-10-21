@@ -55,10 +55,10 @@
   background: rgba(var(--brand-rgb), 0.08);
   border-bottom-color: rgba(var(--brand-rgb), 0.22);
 
-  .app-banner-modo__info i { color: $color-primary; }
+  .app-banner-modo__info i { color: $color-primary-ink; }
 
   .app-banner-modo__btn {
-    color: $color-primary;
+    color: $color-primary-ink;
     border-color: rgba(var(--brand-rgb), 0.30);
 
     @include hover {
@@ -118,7 +118,7 @@
   padding-bottom: $space-6;
 }
 .app-shell--auth {
-  background: #15191c;
+  background: $color-bg-dark;
   .app-content { max-width: none; padding: 0; }
 }
 

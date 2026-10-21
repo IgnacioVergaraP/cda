@@ -20,7 +20,7 @@
   padding: 8px 14px;
   font-size: $fs-sm;
   font-weight: $fw-medium;
-  color: $color-primary;
+  color: $color-primary-ink;
   background: $color-primary-soft;
   border: 1px solid rgba(var(--brand-rgb), 0.20);
   border-radius: $radius-md;
@@ -43,7 +43,7 @@
   border-radius: 10px;
   border: 1px solid rgba(var(--brand-rgb), 0.20);
   background: rgba(var(--brand-rgb), 0.06);
-  color: $color-primary;
+  color: $color-primary-ink;
   font-size: $fs-sm;
 
   i { font-size: 15px; }
@@ -62,7 +62,7 @@
 
 .tp__objetivo-icon {
   font-size: 20px;
-  color: $color-primary;
+  color: $color-primary-ink;
   flex-shrink: 0;
 }
 

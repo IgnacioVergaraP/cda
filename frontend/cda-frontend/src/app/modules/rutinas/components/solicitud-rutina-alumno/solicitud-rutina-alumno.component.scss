@@ -31,7 +31,7 @@
 
 .sra__cta-btn > i:first-child {
   font-size: 22px;
-  color: $color-primary;
+  color: $color-primary-ink;
   flex-shrink: 0;
 }
 
@@ -45,7 +45,7 @@
 .sra__cta-titulo {
   font-size: $fs-base;
   font-weight: $fw-semibold;
-  color: $color-primary;
+  color: $color-primary-ink;
 }
 
 .sra__cta-sub {
@@ -55,7 +55,7 @@
 
 .sra__cta-chevron {
   font-size: 16px;
-  color: $color-primary;
+  color: $color-primary-ink;
 }
 
 // -------- Activa --------
@@ -80,7 +80,7 @@
 
 .sra__activa-icon {
   font-size: 22px;
-  color: $color-primary;
+  color: $color-primary-ink;
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -171,7 +171,7 @@
 
 .sra__resuelta-icon {
   font-size: 20px;
-  color: $color-primary;
+  color: $color-primary-ink;
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -236,7 +236,7 @@
   padding: 6px 12px;
   font-size: $fs-sm;
   font-weight: $fw-medium;
-  color: $color-primary;
+  color: $color-primary-ink;
   background: #ffffff;
   border: 1px solid rgba(var(--brand-rgb), 0.30);
   border-radius: $radius-md;

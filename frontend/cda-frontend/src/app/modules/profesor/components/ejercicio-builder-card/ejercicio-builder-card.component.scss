@@ -33,7 +33,7 @@
   height: 28px;
   border-radius: $radius-full;
   background: $color-primary-soft;
-  color: $color-primary;
+  color: $color-primary-ink;
   font-size: $fs-sm;
   font-weight: $fw-semibold;
   flex-shrink: 0;
@@ -151,7 +151,7 @@
 .ebc__tipo--active {
   background: $color-primary-soft;
   border-color: rgba(var(--brand-rgb), 0.30);
-  color: $color-primary;
+  color: $color-primary-ink;
   font-weight: $fw-semibold;
 }
 

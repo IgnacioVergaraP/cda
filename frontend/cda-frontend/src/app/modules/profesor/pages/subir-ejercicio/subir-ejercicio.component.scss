@@ -14,7 +14,7 @@
   border-radius: 10px;
   border: 1px solid rgba(var(--brand-rgb), 0.20);
   background: rgba(var(--brand-rgb), 0.06);
-  color: $color-primary;
+  color: $color-primary-ink;
   font-size: $fs-sm;
 
   i { font-size: 15px; }
@@ -117,7 +117,7 @@
 .subir__chip--active {
   background: $color-primary-soft;
   border-color: rgba(var(--brand-rgb), 0.30);
-  color: $color-primary;
+  color: $color-primary-ink;
   font-weight: $fw-semibold;
 }
 

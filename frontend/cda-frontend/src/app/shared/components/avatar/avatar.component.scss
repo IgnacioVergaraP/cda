@@ -30,7 +30,7 @@
 }
 
 // Paleta de 8 colores derivada del nombre. Tonos apagados, sin gradientes.
-.avatar--color-0 { background: $color-primary; }  // color de marca
+.avatar--color-0 { background: $color-primary; color: $color-text; }  // color de marca
 .avatar--color-1 { background: #2f5f8f; }  // azul
 .avatar--color-2 { background: #8f5f2f; }  // marrón
 .avatar--color-3 { background: #6f2f5f; }  // violeta

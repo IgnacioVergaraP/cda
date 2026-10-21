@@ -22,7 +22,7 @@
   align-items: center;
   gap: 8px;
 
-  i { font-size: 16px; color: $color-primary; }
+  i { font-size: 16px; color: $color-primary-ink; }
 }
 
 // -------- Horario de hoy --------
@@ -85,7 +85,7 @@
 
   font-size: $fs-md;
   font-weight: $fw-semibold;
-  color: $color-primary;
+  color: $color-primary-ink;
   white-space: nowrap;
 }
 
@@ -147,13 +147,13 @@
 
   @include hover { border-color: var(--brand-40); }
 
-  .inicio__metrica-valor { color: $color-primary; }
-  .inicio__metrica-icon { color: $color-primary; }
+  .inicio__metrica-valor { color: $color-primary-ink; }
+  .inicio__metrica-icon { color: $color-primary-ink; }
 }
 
 .inicio__metrica-icon {
   font-size: 20px;
-  color: $color-primary;
+  color: $color-primary-ink;
   margin-bottom: $space-2;
 }
 
@@ -268,7 +268,7 @@
 
 .inicio__acceso-icon {
   font-size: 18px;
-  color: $color-primary;
+  color: $color-primary-ink;
 }
 
 .inicio__acceso-texto {

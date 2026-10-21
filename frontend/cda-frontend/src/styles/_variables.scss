@@ -1,9 +1,9 @@
 // ============================================================
-// Design tokens — identidad fitness adaptada de estilos.txt
+// Design tokens — identidad Club Deportivo Alemán
 // ============================================================
 
 // --- Colores neutros (base de toda la UI) ---
-$color-bg:            #F3F3F3;
+$color-bg:            #F5F5F5;
 $color-bg-subtle:     #F6F6F7;
 $color-bg-hover:      #eeeeef;
 $color-surface:       #ffffff;
@@ -11,20 +11,24 @@ $color-border:        #E3E3E3;
 $color-border-strong: #d3d1cb;
 
 // --- Texto ---
-$color-bg-dark:       #202020;
-$color-body:          #7B7E86;
-$color-text:          #1C1C1C;
-$color-text-muted:    #7B7E86;
+$color-bg-dark:       #18181B;
+$color-body:          #62626B;
+$color-text:          #18181B;
+$color-text-muted:    #62626B;
 $color-text-subtle:   #9fa2ad;
 $color-text-inverse:  #ffffff;
 
-// --- Acentos (un solo color de marca, plano) ---
-$color-primary-default:       #FF6B00;
-$color-primary-hover-default: #202020;
-$color-primary-soft-default:  #fff0e6;
+// --- Acentos de marca (amarillo sobre bases neutras) ---
+$color-primary-default:       #FFD200;
+$color-primary-hover-default: #E5BD00;
+$color-primary-soft-default:  #FFFAE6;
 $color-primary:       var(--color-primary, #{$color-primary-default});
 $color-primary-hover: var(--color-primary-hover, #{$color-primary-hover-default});
 $color-primary-soft:  var(--color-primary-soft, #{$color-primary-soft-default});
+
+// Texto legible sobre superficies claras y acentos del logotipo.
+$color-primary-ink:   #18181B;
+$color-brand-red:     #FF0311;
 
 // --- Estados ---
 $color-success:       #2f6f4e;

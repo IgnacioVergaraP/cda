@@ -40,10 +40,10 @@ export class GimnasioConfigService {
 
   private aplicarTema(): void {
     const root = document.documentElement;
-    // La identidad visual del template tiene prioridad sobre el color del gimnasio.
-    const primary = '#FF6B00';
+    // La identidad de Club Deportivo Alemán se mantiene también después del login.
+    const primary = '#FFD200';
     root.style.setProperty(CSS_VAR_PRIMARY, primary);
-    root.style.setProperty(CSS_VAR_PRIMARY_HOVER, '#202020');
+    root.style.setProperty(CSS_VAR_PRIMARY_HOVER, '#E5BD00');
     root.style.setProperty(CSS_VAR_PRIMARY_SOFT, this.lighten(primary, 0.9));
   }
 

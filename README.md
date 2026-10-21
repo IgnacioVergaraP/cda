@@ -1,6 +1,6 @@
 # CDA app
 
-Aplicación de CDA con backend Flask en `backend/` y frontend Angular en
+Aplicación del Club Deportivo Alemán (CDA) con backend Flask en `backend/` y frontend Angular en
 `frontend/cda-frontend/`. Cada cliente debe usar su propio proyecto Supabase y
 sus propios dos proyectos Vercel, con variables independientes.
 
@@ -141,6 +141,15 @@ sus rutas por rol deben asignarse también `rol` y `gimnasio_id` en
 Las políticas RLS se conservaron de la exportación. Como la exportación no
 incluía permisos ACL, el setup define permisos explícitos de tablas y reserva
 la ejecución de las RPC para el backend con `service_role`.
+
+Para poblar un entorno de demostración, ejecutar
+`backend/scripts/setup/006_datos_demo_cda.sql`. Crea 4 alumnos, 1 profesor,
+1 administrador, 16 ejercicios, 7 rutinas, 20 registros de progreso recientes
+y 3 horarios. Reutiliza las cuentas de prueba existentes y conserva sus
+contraseñas. Las cuentas nuevas de alumno usan `alumno123`; profesor y
+administrador usan `profe123` y `admin123`. Todos son datos ficticios.
+Los grupos musculares de los ejercicios se corresponden con las imágenes
+incluidas en `frontend/cda-frontend/src/assets/img`; no requieren Storage.
 
 Comprobar login, autorización por rol, lectura y escritura de una rutina y
 recarga directa de una ruta interna. Confirmar que los registros aparecen

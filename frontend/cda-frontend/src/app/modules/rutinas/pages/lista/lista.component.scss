@@ -20,7 +20,7 @@
   height: 56px;
   border-radius: 50%;
   background: $color-primary;
-  color: $color-text-inverse;
+  color: $color-text;
   text-decoration: none;
   box-shadow: 0 4px 12px rgba(var(--brand-rgb), 0.28);
   transition: background 150ms ease, transform 100ms ease;
@@ -60,7 +60,7 @@
   border-radius: 10px;
   border: 1px solid rgba(var(--brand-rgb), 0.20);
   background: rgba(var(--brand-rgb), 0.06);
-  color: $color-primary;
+  color: $color-primary-ink;
   font-size: $fs-sm;
 
   i { font-size: 15px; }
@@ -96,7 +96,7 @@
 .rutinas-lista__toggle--active {
   background: $color-primary-soft;
   border-color: rgba(var(--brand-rgb), 0.30);
-  color: $color-primary;
+  color: $color-primary-ink;
 }
 
 // -------- Sheet de solicitud --------
@@ -217,7 +217,7 @@
 }
 
 .srs__chip--active {
-  color: $color-primary;
+  color: $color-primary-ink;
   background: $color-primary-soft;
   border-color: rgba(var(--brand-rgb), 0.30);
   font-weight: $fw-semibold;

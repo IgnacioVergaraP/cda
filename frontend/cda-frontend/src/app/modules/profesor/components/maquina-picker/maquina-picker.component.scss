@@ -16,7 +16,7 @@
   border: 1px solid rgba(var(--brand-rgb), 0.30);
   border-radius: $radius-md;
 
-  i { color: $color-primary; font-size: 16px; flex-shrink: 0; }
+  i { color: $color-primary-ink; font-size: 16px; flex-shrink: 0; }
 }
 
 .mp__seleccionada-info {
@@ -113,7 +113,7 @@
 .mp__chip--active {
   background: $color-primary-soft;
   border-color: rgba(var(--brand-rgb), 0.30);
-  color: $color-primary;
+  color: $color-primary-ink;
   font-weight: $fw-semibold;
 }
 

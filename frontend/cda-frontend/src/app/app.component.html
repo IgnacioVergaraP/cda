@@ -5,13 +5,8 @@
   <div class="app-main">
 
     <div class="app-gym-brand" *ngIf="!(esAuth$ | async) && (gimnasioConfig$ | async) as gym">
-      <img *ngIf="gym.logo_url; else gymFallback" [src]="gym.logo_url" alt="">
-      <ng-template #gymFallback>
-        <span class="app-gym-brand__mark" aria-hidden="true">
-          <i class="bi bi-building"></i>
-        </span>
-      </ng-template>
-      <span class="app-gym-brand__name">{{ gym.nombre }}</span>
+      <img src="assets/brand/logotipo-cda.svg" alt="" width="40" height="40">
+      <span class="app-gym-brand__name">Club Deportivo Alemán</span>
     </div>
 
     <!-- Banner: Estás en modo admin (admin viendo /admin en mobile) -->

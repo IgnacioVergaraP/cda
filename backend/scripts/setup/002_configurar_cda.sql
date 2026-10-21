@@ -3,7 +3,7 @@
 BEGIN;
 
 INSERT INTO public.gimnasios (nombre, slug)
-VALUES ('CDA', 'cda')
+VALUES ('Club Deportivo Alemán', 'cda')
 ON CONFLICT (slug) DO NOTHING;
 
 COMMIT;

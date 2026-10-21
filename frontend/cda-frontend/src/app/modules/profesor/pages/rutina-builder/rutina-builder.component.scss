@@ -76,7 +76,7 @@
 .rb__chip--active {
   background: $color-primary-soft;
   border-color: rgba(var(--brand-rgb), 0.30);
-  color: $color-primary;
+  color: $color-primary-ink;
   font-weight: $fw-semibold;
 }
 
@@ -121,7 +121,7 @@
 
   font-size: $fs-base;
   font-weight: $fw-medium;
-  color: $color-primary;
+  color: $color-primary-ink;
   background: transparent;
   border: 1px dashed rgba(var(--brand-rgb), 0.40);
   border-radius: $radius-md;

@@ -50,16 +50,16 @@
   box-shadow: 0 6px 16px rgba(var(--brand-rgb), 0.18);
 
   &:not(:disabled):hover {
-    color: $color-text-inverse;
+    color: $color-text;
     background: var(--color-primary-hover, #{$color-primary-hover});
     border-color: var(--color-primary-hover, #{$color-primary-hover});
   }
 }
 
 .ui-button--secondary {
-  background: $color-bg-dark;
-  color: $color-text-inverse;
-  border-color: $color-bg-dark;
+  background: $color-surface;
+  color: $color-text;
+  border-color: $color-border-strong;
 
   @include hover {
     &:not(:disabled) {

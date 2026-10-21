@@ -29,7 +29,7 @@ button {
   cursor: pointer;
 }
 
-a { color: $color-primary; text-decoration: none; }
+a { color: $color-primary-ink; text-decoration: none; }
 
 :focus-visible { @include focus-ring; }
 
